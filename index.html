@@ -14,8 +14,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
             min-height: 100vh;
             padding: 20px;
         }
@@ -23,49 +24,56 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
+            background: #161b22;
+            border-bottom: 1px solid #21262d;
+            color: #c9d1d9;
+            padding: 24px 32px;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #58a6ff;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: 14px;
+            color: #8b949e;
         }
 
         .content {
-            padding: 40px;
+            padding: 32px;
         }
 
         .section {
-            margin-bottom: 40px;
+            margin-bottom: 32px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 24px;
         }
 
         .section-title {
-            font-size: 1.5em;
-            color: #2a5298;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
+            font-size: 20px;
+            font-weight: 600;
+            color: #c9d1d9;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #21262d;
         }
 
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 16px;
         }
 
         .form-group {
@@ -75,32 +83,36 @@
 
         .form-group label {
             font-weight: 600;
-            color: #333;
+            color: #c9d1d9;
             margin-bottom: 8px;
-            font-size: 0.95em;
+            font-size: 14px;
         }
 
         .form-group input,
         .form-group select {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: all 0.3s;
+            padding: 5px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+            line-height: 20px;
+            transition: all 0.2s;
         }
 
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
         }
 
         .form-group input:disabled,
         .form-group select:disabled {
-            background-color: #f5f5f5;
+            background-color: #161b22;
+            color: #8b949e;
             cursor: not-allowed;
-            opacity: 0.7;
+            opacity: 0.6;
         }
 
         .password-wrapper {
@@ -116,91 +128,105 @@
 
         .toggle-password {
             position: absolute;
-            right: 10px;
+            right: 8px;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1.2em;
-            color: #667eea;
-            padding: 5px;
-            transition: color 0.3s;
+            font-size: 16px;
+            padding: 4px 8px;
+            transition: opacity 0.2s;
+            opacity: 0.7;
         }
 
         .toggle-password:hover {
-            color: #764ba2;
+            opacity: 1;
         }
 
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            gap: 8px;
+            padding: 12px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
         }
 
         .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             cursor: pointer;
+            accent-color: #58a6ff;
         }
 
         .checkbox-group label {
             cursor: pointer;
             margin: 0;
+            font-size: 14px;
+            color: #c9d1d9;
         }
 
         .button-group {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 12px;
+            margin-top: 24px;
         }
 
         .btn {
             flex: 1;
-            padding: 15px 30px;
-            font-size: 1.1em;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
+            padding: 5px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            line-height: 20px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #238636;
+            border-color: rgba(240, 246, 252, 0.1);
+            color: #ffffff;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: #2ea043;
+            border-color: rgba(240, 246, 252, 0.1);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
+            background: #21262d;
+            border-color: rgba(240, 246, 252, 0.1);
+            color: #c9d1d9;
         }
 
         .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn:disabled {
+            background: #161b22;
+            border-color: #30363d;
+            color: #484f58;
+            cursor: not-allowed;
         }
 
         .output-section {
-            margin-top: 40px;
+            margin-top: 32px;
             display: none;
         }
 
         .output-box {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
             max-height: 500px;
             overflow-y: auto;
             white-space: pre-wrap;
@@ -208,22 +234,24 @@
         }
 
         .alert {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
             display: none;
+            font-size: 14px;
+            border: 1px solid;
         }
 
         .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: #0d1117;
+            color: #3fb950;
+            border-color: #238636;
         }
 
         .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #0d1117;
+            color: #f85149;
+            border-color: #da3633;
         }
 
         .loading {
@@ -233,8 +261,8 @@
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 3px solid #30363d;
+            border-top: 3px solid #58a6ff;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -248,23 +276,350 @@
         }
 
         .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-left: 3px solid #58a6ff;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
         }
 
         .info-box strong {
-            color: #1976D2;
+            color: #58a6ff;
+        }
+
+        .info-box code {
+            background: #0d1117;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #79c0ff;
+        }
+
+        h3, h4 {
+            color: #c9d1d9;
+            font-weight: 600;
+        }
+
+        input[type="hidden"] {
+            display: none;
+        }
+
+        /* Light Theme */
+        body.light-theme {
+            background: #f6f8fa;
+            color: #24292f;
+        }
+
+        body.light-theme .container {
+            background: #ffffff;
+            border-color: #d0d7de;
+        }
+
+        body.light-theme .header {
+            background: #ffffff;
+            border-bottom-color: #d0d7de;
+            color: #24292f;
+        }
+
+        body.light-theme .header h1 {
+            color: #0969da;
+        }
+
+        body.light-theme .header p {
+            color: #57606a;
+        }
+
+        body.light-theme .section {
+            background: #f6f8fa;
+            border-color: #d0d7de;
+        }
+
+        body.light-theme .section-title {
+            color: #24292f;
+            border-bottom-color: #d0d7de;
+        }
+
+        body.light-theme .form-group label {
+            color: #24292f;
+        }
+
+        body.light-theme .form-group input,
+        body.light-theme .form-group select {
+            background: #ffffff;
+            border-color: #d0d7de;
+            color: #24292f;
+        }
+
+        body.light-theme .form-group input:focus,
+        body.light-theme .form-group select:focus {
+            border-color: #0969da;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+        }
+
+        body.light-theme .form-group input:disabled,
+        body.light-theme .form-group select:disabled {
+            background-color: #f6f8fa;
+            color: #57606a;
+        }
+
+        body.light-theme .checkbox-group {
+            background: #ffffff;
+            border-color: #d0d7de;
+        }
+
+        body.light-theme .checkbox-group label {
+            color: #24292f;
+        }
+
+        body.light-theme .output-box {
+            background: #f6f8fa;
+            color: #24292f;
+            border-color: #d0d7de;
+        }
+
+        body.light-theme .alert-success {
+            background: #dafbe1;
+            color: #0f5323;
+            border-color: #2da44e;
+        }
+
+        body.light-theme .alert-error {
+            background: #ffebe9;
+            color: #cf222e;
+            border-color: #cf222e;
+        }
+
+        body.light-theme .info-box {
+            background: #ddf4ff;
+            border-color: #54aeff;
+        }
+
+        body.light-theme .info-box strong {
+            color: #0969da;
+        }
+
+        body.light-theme .info-box code {
+            background: #f6f8fa;
+            color: #0969da;
+        }
+
+        body.light-theme h3,
+        body.light-theme h4 {
+            color: #24292f;
+        }
+
+        body.light-theme .spinner {
+            border-color: #d0d7de;
+            border-top-color: #0969da;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            background: none;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle:hover {
+            background: #21262d;
+            border-color: #8b949e;
+        }
+
+        body.light-theme .theme-toggle {
+            border-color: #d0d7de;
+            color: #24292f;
+        }
+
+        body.light-theme .theme-toggle:hover {
+            background: #f6f8fa;
+            border-color: #0969da;
+        }
+
+        .header {
+            position: relative;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            margin: 5% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 6px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        body.light-theme .modal-content {
+            background: #ffffff;
+            border-color: #d0d7de;
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #21262d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.light-theme .modal-header {
+            border-bottom-color: #d0d7de;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #c9d1d9;
+            margin: 0;
+        }
+
+        body.light-theme .modal-header h2 {
+            color: #24292f;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #21262d;
+            color: #c9d1d9;
+        }
+
+        body.light-theme .modal-close:hover {
+            background: #f6f8fa;
+            color: #24292f;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #21262d;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        body.light-theme .modal-footer {
+            border-top-color: #d0d7de;
+        }
+
+        .modal-footer .btn {
+            flex: 0 0 auto;
+            min-width: 120px;
+        }
+
+        /* Fixed Footer Button */
+        .fixed-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #161b22;
+            border-top: 1px solid #30363d;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        body.light-theme .fixed-footer {
+            background: #ffffff;
+            border-top-color: #d0d7de;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .fixed-footer-content {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .fixed-footer .btn {
+            min-width: 250px;
+            font-size: 16px;
+            padding: 12px 24px;
+        }
+
+        .content-wrapper {
+            padding-bottom: 80px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container content-wrapper">
         <div class="header">
-            <h1>🐳 TOTVS Protheus</h1>
-            <p>Docker Compose Generator - Standalone (Sem Backend)</p>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                <span id="themeIcon">☀️</span>
+                <span id="themeText">Light</span>
+            </button>
+            <h1>🐳 TOTVS Protheus In Docker</h1>
+            <p>Docker Compose Generator</p>
         </div>
 
         <div class="content">
@@ -630,29 +985,39 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Buttons -->
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">📋 Gerar Docker Compose</button>
-                    <button type="button" id="downloadBtn" class="btn btn-secondary" disabled>⬇️ Download YAML</button>
-                </div>
             </form>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 <p style="margin-top: 10px;">Gerando configuração...</p>
             </div>
+        </div>
+    </div>
 
-            <!-- Output Section -->
-            <div class="output-section" id="outputSection">
-                <div class="section">
-                    <h2 class="section-title">📄 Docker Compose Gerado</h2>
-                    <div class="info-box">
-                        <strong>Como usar:</strong> Copie o conteúdo abaixo e salve como <code>docker-compose.yaml</code> ou clique em "Download YAML"
-                    </div>
-                    <div class="output-box" id="outputBox"></div>
-                </div>
+    <!-- Modal -->
+    <div id="composeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📄 Docker Compose Gerado</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
+            <div class="modal-body">
+                <div class="info-box">
+                    <strong>Como usar:</strong> Copie o conteúdo abaixo e salve como <code>docker-compose.yaml</code> ou clique em "Download YAML"
+                </div>
+                <div class="output-box" id="outputBox"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                <button type="button" id="downloadBtn" class="btn btn-primary">⬇️ Download YAML</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fixed Footer Button -->
+    <div class="fixed-footer">
+        <div class="fixed-footer-content">
+            <button type="submit" form="configForm" class="btn btn-primary">📋 Gerar Docker Compose</button>
         </div>
     </div>
 
@@ -670,8 +1035,36 @@
             }
         }
 
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            
+            body.classList.toggle('light-theme');
+            
+            if (body.classList.contains('light-theme')) {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                document.getElementById('themeIcon').textContent = '🌙';
+                document.getElementById('themeText').textContent = 'Dark';
+            }
+        });
+
         const form = document.getElementById('configForm');
-        const outputSection = document.getElementById('outputSection');
+        const composeModal = document.getElementById('composeModal');
         const outputBox = document.getElementById('outputBox');
         const downloadBtn = document.getElementById('downloadBtn');
         const loading = document.getElementById('loading');
@@ -773,8 +1166,6 @@
             dbAccessPassword.disabled = false;
             
             loading.style.display = 'block';
-            outputSection.style.display = 'none';
-            downloadBtn.disabled = true;
 
             const formData = new FormData(form);
             const config = {
@@ -866,8 +1257,7 @@
                 currentConfig = config;
                 currentYaml = yamlContent;
                 outputBox.textContent = yamlContent;
-                outputSection.style.display = 'block';
-                downloadBtn.disabled = false;
+                composeModal.style.display = 'block';
                 showAlert('success', '✅ Docker Compose gerado com sucesso!');
             } catch (error) {
                 showAlert('error', '❌ Erro: ' + error.message);
@@ -908,6 +1298,24 @@
                 showAlert('success', '✅ Download iniciado!');
             } catch (error) {
                 showAlert('error', '❌ Erro ao fazer download: ' + error.message);
+            }
+        });
+
+        function closeModal() {
+            composeModal.style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target === composeModal) {
+                closeModal();
+            }
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && composeModal.style.display === 'block') {
+                closeModal();
             }
         });
     </script>

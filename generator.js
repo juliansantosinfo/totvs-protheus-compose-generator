@@ -211,7 +211,6 @@ function generateDockerCompose(config) {
         composeDict.services.apprest = {
             image: `juliansantosinfo/totvs_appserver:${config.appserver_release}`,
             container_name: config.apprest_container_name,
-            profiles: ['full'],
             restart: config.restart_policy,
             ports: [
                 `${config.apprest_port}:${config.apprest_port}`,
