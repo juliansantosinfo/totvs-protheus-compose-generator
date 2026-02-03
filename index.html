@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOTVS Protheus Docker Compose Generator - Standalone</title>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script src="generator.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2a5298;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input:disabled,
+        .form-group select:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            flex: 1;
+            padding-right: 45px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #667eea;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: #764ba2;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+        }
+
+        .output-section {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .output-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐳 TOTVS Protheus</h1>
+            <p>Docker Compose Generator - Standalone (Sem Backend)</p>
+        </div>
+
+        <div class="content">
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="alert alert-error" id="errorAlert"></div>
+
+            <form id="configForm">
+                <!-- Network Configuration -->
+                <div class="section">
+                    <h2 class="section-title">🌐 Configuração de Rede</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="network_name">Nome da Rede Docker</label>
+                            <input type="text" id="network_name" name="network_name" value="totvs" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="restart_policy">Política de Restart</label>
+                            <select id="restart_policy" name="restart_policy" required>
+                                <option value="always" selected>always - Sempre reiniciar</option>
+                                <option value="unless-stopped">unless-stopped - Reiniciar exceto se parado manualmente</option>
+                                <option value="on-failure">on-failure - Reiniciar apenas em caso de falha</option>
+                                <option value="no">no - Nunca reiniciar</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Configuration -->
+                <div class="section">
+                    <h2 class="section-title">⚙️ Configuração do Banco de Dados</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="database_type">Tipo de Banco de Dados</label>
+                            <select id="database_type" name="database_type" required>
+                                <option value="postgresql">PostgreSQL (Recomendado)</option>
+                                <option value="mssql">Microsoft SQL Server</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="timezone">Fuso Horário</label>
+                            <input type="text" id="timezone" name="timezone" value="America/Sao_Paulo" required>
+                        </div>
+                    </div>
+                    <!-- PostgreSQL Config -->
+                    <div id="postgresConfig" style="margin-top: 20px;">
+                        <h3 style="color: #2a5298; margin-bottom: 15px;">PostgreSQL</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="postgres_container_name">Nome do Container</label>
+                                <input type="text" id="postgres_container_name" name="postgres_container_name" value="totvs_postgres">
+                            </div>
+                            <div class="form-group">
+                                <label for="postgres_password">Senha</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="postgres_password" name="postgres_password" value="ProtheusDatabasePassword1">
+                                    <button type="button" class="toggle-password" onclick="togglePassword('postgres_password')">👁️</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="postgres_external_port">Porta Externa</label>
+                                <input type="number" id="postgres_external_port" name="postgres_external_port" value="25432">
+                            </div>
+                        </div>
+                        
+                        <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="postgres_volume_name">Nome do Volume de Dados</label>
+                                <input type="text" id="postgres_volume_name" name="postgres_volume_name" value="totvs_postgres_data">
+                            </div>
+                            <div class="form-group">
+                                <label for="postgres_volume_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                <input type="text" id="postgres_volume_bind" name="postgres_volume_bind" placeholder="/caminho/no/host/postgres_data">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- MSSQL Config -->
+                    <div id="mssqlConfig" style="margin-top: 20px; display: none;">
+                        <h3 style="color: #2a5298; margin-bottom: 15px;">Microsoft SQL Server</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="mssql_container_name">Nome do Container</label>
+                                <input type="text" id="mssql_container_name" name="mssql_container_name" value="totvs_mssql">
+                            </div>
+                            <div class="form-group">
+                                <label for="mssql_sa_password">Senha SA</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="mssql_sa_password" name="mssql_sa_password" value="ProtheusDatabasePassword1">
+                                    <button type="button" class="toggle-password" onclick="togglePassword('mssql_sa_password')">👁️</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="mssql_external_port">Porta Externa</label>
+                                <input type="number" id="mssql_external_port" name="mssql_external_port" value="25433">
+                            </div>
+                        </div>
+                        
+                        <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="mssql_volume_name">Nome do Volume de Dados</label>
+                                <input type="text" id="mssql_volume_name" name="mssql_volume_name" value="totvs_mssql_data">
+                            </div>
+                            <div class="form-group">
+                                <label for="mssql_volume_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                <input type="text" id="mssql_volume_bind" name="mssql_volume_bind" placeholder="/caminho/no/host/mssql_data">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DBAccess Configuration -->
+                <div class="section">
+                    <h2 class="section-title">🔌 DBAccess</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="dbaccess_container_name">Nome do Container</label>
+                            <input type="text" id="dbaccess_container_name" name="dbaccess_container_name" value="totvs_dbaccess">
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_version">Versão</label>
+                            <select id="dbaccess_version" name="dbaccess_version" required>
+                                <option value="23.1.1.4">23.1.1.4</option>
+                                <option value="24.1.0.0">24.1.0.0</option>
+                                <option value="24.1.1.0" selected>24.1.1.0</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_database_profile">Perfil do Banco</label>
+                            <select id="dbaccess_database_profile" name="dbaccess_database_profile" disabled>
+                                <option value="POSTGRES">POSTGRES</option>
+                                <option value="MSSQL" selected>MSSQL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_database_server">Servidor do Banco</label>
+                            <input type="text" id="dbaccess_database_server" name="dbaccess_database_server" value="totvs_mssql" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_database_port">Porta do Banco</label>
+                            <input type="number" id="dbaccess_database_port" name="dbaccess_database_port" value="1433" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_database_alias">Alias do Banco</label>
+                            <input type="text" id="dbaccess_database_alias" name="dbaccess_database_alias" value="protheus">
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_database_name">Nome do Banco</label>
+                            <input type="text" id="dbaccess_database_name" name="dbaccess_database_name" value="protheus">
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_database_username">Usuário do Banco</label>
+                            <input type="text" id="dbaccess_database_username" name="dbaccess_database_username" value="sa" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_database_password">Senha do Banco</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="dbaccess_database_password" name="dbaccess_database_password" value="ProtheusDatabasePassword1" disabled>
+                                <button type="button" class="toggle-password" onclick="togglePassword('dbaccess_database_password')">👁️</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dbaccess_consolefile">Arquivo de Console</label>
+                            <input type="text" id="dbaccess_consolefile" name="dbaccess_consolefile" value="/totvs/dbaccess/multi/dbconsole.log">
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-group" style="margin-top: 15px;">
+                        <input type="checkbox" id="dbaccess_expose_ports" name="dbaccess_expose_ports">
+                        <label for="dbaccess_expose_ports">Expor portas do DBAccess (útil para debug e ferramentas externas)</label>
+                    </div>
+                    <div id="dbAccessPortsConfig" style="display: none; margin-top: 15px;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="dbaccess_port_7890">Porta Externa 7890</label>
+                                <input type="number" id="dbaccess_port_7890" name="dbaccess_port_7890" value="7890">
+                            </div>
+                            <div class="form-group">
+                                <label for="dbaccess_port_7891">Porta Externa 7891</label>
+                                <input type="number" id="dbaccess_port_7891" name="dbaccess_port_7891" value="7891">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- License Server Configuration -->
+                <div class="section">
+                    <h2 class="section-title">🔐 License Server</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="licenseserver_container_name">Nome do Container</label>
+                            <input type="text" id="licenseserver_container_name" name="licenseserver_container_name" value="totvs_licenseserver">
+                        </div>
+                        <div class="form-group">
+                            <label for="licenseserver_version">Versão</label>
+                            <select id="licenseserver_version" name="licenseserver_version" required>
+                                <option value="3.6.1">3.6.1</option>
+                                <option value="3.6.2">3.6.2</option>
+                                <option value="3.7.0" selected>3.7.0</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="license_consolefile">Arquivo de Console</label>
+                            <input type="text" id="license_consolefile" name="license_consolefile" value="/totvs/licenseserver/bin/appserver/licenseserver.log">
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden internal ports -->
+                    <input type="hidden" id="license_tcp_port" name="license_tcp_port" value="2234">
+                    <input type="hidden" id="license_port" name="license_port" value="5555">
+                    <input type="hidden" id="license_webapp_port" name="license_webapp_port" value="8020">
+                    
+                    <div class="checkbox-group" style="margin-top: 15px;">
+                        <input type="checkbox" id="licenseserver_expose_ports" name="licenseserver_expose_ports">
+                        <label for="licenseserver_expose_ports">Expor portas do License Server (útil para monitoramento)</label>
+                    </div>
+                    <div id="licenseServerPortsConfig" style="display: none; margin-top: 15px;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="license_tcp_port_external">Porta Externa TCP</label>
+                                <input type="number" id="license_tcp_port_external" name="license_tcp_port_external" value="2234">
+                            </div>
+                            <div class="form-group">
+                                <label for="license_port_external">Porta Externa Principal</label>
+                                <input type="number" id="license_port_external" name="license_port_external" value="5555">
+                            </div>
+                            <div class="form-group">
+                                <label for="license_webapp_port_external">Porta Externa Web App</label>
+                                <input type="number" id="license_webapp_port_external" name="license_webapp_port_external" value="8020">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AppServer Configuration -->
+                <div class="section">
+                    <h2 class="section-title">🖥️ AppServer (Aplicação Principal)</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="appserver_container_name">Nome do Container</label>
+                            <input type="text" id="appserver_container_name" name="appserver_container_name" value="totvs_appserver">
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_release">Release do Protheus</label>
+                            <select id="appserver_release" name="appserver_release" required>
+                                <option value="12.1.2310">12.1.2310</option>
+                                <option value="12.1.2410">12.1.2410</option>
+                                <option value="12.1.2510" selected>12.1.2510</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_port">Porta AppServer</label>
+                            <input type="number" id="appserver_port" name="appserver_port" value="25001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_web_port">Porta Web/Smartclient</label>
+                            <input type="number" id="appserver_web_port" name="appserver_web_port" value="25002" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_rest_port">Porta REST</label>
+                            <input type="number" id="appserver_rest_port" name="appserver_rest_port" value="25080" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_web_manager">Porta Web Manager</label>
+                            <input type="number" id="appserver_web_manager" name="appserver_web_manager" value="25088" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_rpo_custom">RPO Customizado</label>
+                            <input type="text" id="appserver_rpo_custom" name="appserver_rpo_custom" value="/totvs/protheus/apo/custom.rpo">
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_consolefile">Arquivo de Console</label>
+                            <input type="text" id="appserver_consolefile" name="appserver_consolefile" value="/totvs/protheus/bin/appserver/appserver.log">
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_multiprotocolportsecure">Porta Segura Multi-Protocolo</label>
+                            <input type="number" id="appserver_multiprotocolportsecure" name="appserver_multiprotocolportsecure" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_multiprotocolport">Porta Multi-Protocolo</label>
+                            <input type="number" id="appserver_multiprotocolport" name="appserver_multiprotocolport" value="1">
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="appserver_volume_name">Nome do Volume de Dados</label>
+                            <input type="text" id="appserver_volume_name" name="appserver_volume_name" value="totvs_appserver_data">
+                        </div>
+                        <div class="form-group">
+                            <label for="appserver_volume_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                            <input type="text" id="appserver_volume_bind" name="appserver_volume_bind" placeholder="/caminho/no/host/protheus_data">
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Adicionais</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="appserver_enable_volume_apo" name="appserver_enable_volume_apo">
+                        <label for="appserver_enable_volume_apo">Habilitar volume para RPO (/totvs/protheus/apo)</label>
+                    </div>
+                    <div id="volumeApoConfig" style="display: none; margin-top: 15px;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="appserver_volume_apo">Nome do Volume APO</label>
+                                <input type="text" id="appserver_volume_apo" name="appserver_volume_apo" value="totvs_appserver_apo">
+                            </div>
+                            <div class="form-group">
+                                <label for="appserver_volume_apo_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                <input type="text" id="appserver_volume_apo_bind" name="appserver_volume_apo_bind" placeholder="/caminho/no/host/apo">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-group" style="margin-top: 15px;">
+                        <input type="checkbox" id="appserver_enable_volume_logs" name="appserver_enable_volume_logs">
+                        <label for="appserver_enable_volume_logs">Habilitar volume para Logs (/totvs/protheus/bin/appserver)</label>
+                    </div>
+                    <div id="volumeLogsConfig" style="display: none; margin-top: 15px;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="appserver_volume_logs">Nome do Volume Logs</label>
+                                <input type="text" id="appserver_volume_logs" name="appserver_volume_logs" value="totvs_appserver_logs">
+                            </div>
+                            <div class="form-group">
+                                <label for="appserver_volume_logs_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                <input type="text" id="appserver_volume_logs_bind" name="appserver_volume_logs_bind" placeholder="/caminho/no/host/logs">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REST Server Configuration -->
+                <div class="section">
+                    <h2 class="section-title">🌐 Servidor REST (Opcional)</h2>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="include_rest_server" name="include_rest_server">
+                        <label for="include_rest_server">Incluir servidor REST dedicado (perfil full)</label>
+                    </div>
+                    <div id="restServerConfig" style="display: none; margin-top: 20px;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="apprest_container_name">Nome do Container</label>
+                                <input type="text" id="apprest_container_name" name="apprest_container_name" value="totvs_apprest">
+                            </div>
+                            <div class="form-group">
+                                <label for="apprest_port">Porta AppRest</label>
+                                <input type="number" id="apprest_port" name="apprest_port" value="25101">
+                            </div>
+                            <div class="form-group">
+                                <label for="apprest_web_port">Porta Web</label>
+                                <input type="number" id="apprest_web_port" name="apprest_web_port" value="25102">
+                            </div>
+                            <div class="form-group">
+                                <label for="apprest_rest_port">Porta REST</label>
+                                <input type="number" id="apprest_rest_port" name="apprest_rest_port" value="25180">
+                            </div>
+                            <div class="form-group">
+                                <label for="apprest_web_manager">Porta Web Manager</label>
+                                <input type="number" id="apprest_web_manager" name="apprest_web_manager" value="25188">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">📋 Gerar Docker Compose</button>
+                    <button type="button" id="downloadBtn" class="btn btn-secondary" disabled>⬇️ Download YAML</button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Gerando configuração...</p>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section" id="outputSection">
+                <div class="section">
+                    <h2 class="section-title">📄 Docker Compose Gerado</h2>
+                    <div class="info-box">
+                        <strong>Como usar:</strong> Copie o conteúdo abaixo e salve como <code>docker-compose.yaml</code> ou clique em "Download YAML"
+                    </div>
+                    <div class="output-box" id="outputBox"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.nextElementSibling;
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                field.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        const form = document.getElementById('configForm');
+        const outputSection = document.getElementById('outputSection');
+        const outputBox = document.getElementById('outputBox');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loading = document.getElementById('loading');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const includeRestCheckbox = document.getElementById('include_rest_server');
+        const restServerConfig = document.getElementById('restServerConfig');
+        const databaseTypeSelect = document.getElementById('database_type');
+        const postgresConfig = document.getElementById('postgresConfig');
+        const mssqlConfig = document.getElementById('mssqlConfig');
+        const dbAccessProfile = document.getElementById('dbaccess_database_profile');
+        const dbAccessServer = document.getElementById('dbaccess_database_server');
+        const dbAccessPort = document.getElementById('dbaccess_database_port');
+        const dbAccessUsername = document.getElementById('dbaccess_database_username');
+        const dbAccessPassword = document.getElementById('dbaccess_database_password');
+        const postgresPassword = document.getElementById('postgres_password');
+        const mssqlPassword = document.getElementById('mssql_sa_password');
+        
+        const enableVolumeApo = document.getElementById('appserver_enable_volume_apo');
+        const volumeApoConfig = document.getElementById('volumeApoConfig');
+        const enableVolumeLogs = document.getElementById('appserver_enable_volume_logs');
+        const volumeLogsConfig = document.getElementById('volumeLogsConfig');
+        const dbAccessExposePorts = document.getElementById('dbaccess_expose_ports');
+        const dbAccessPortsConfig = document.getElementById('dbAccessPortsConfig');
+        const licenseServerExposePorts = document.getElementById('licenseserver_expose_ports');
+        const licenseServerPortsConfig = document.getElementById('licenseServerPortsConfig');
+
+        let currentConfig = null;
+        let currentYaml = null;
+
+        // Sync database password to DBAccess
+        postgresPassword.addEventListener('input', function() {
+            if (databaseTypeSelect.value === 'postgresql') {
+                dbAccessPassword.value = this.value;
+            }
+        });
+
+        mssqlPassword.addEventListener('input', function() {
+            if (databaseTypeSelect.value === 'mssql') {
+                dbAccessPassword.value = this.value;
+            }
+        });
+
+        // Toggle REST server config
+        includeRestCheckbox.addEventListener('change', function() {
+            restServerConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle volume APO config
+        enableVolumeApo.addEventListener('change', function() {
+            volumeApoConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle volume Logs config
+        enableVolumeLogs.addEventListener('change', function() {
+            volumeLogsConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle DBAccess ports config
+        dbAccessExposePorts.addEventListener('change', function() {
+            dbAccessPortsConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle License Server ports config
+        licenseServerExposePorts.addEventListener('change', function() {
+            licenseServerPortsConfig.style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Toggle database config based on type
+        function updateDatabaseConfig() {
+            const isPostgres = databaseTypeSelect.value === 'postgresql';
+            postgresConfig.style.display = isPostgres ? 'block' : 'none';
+            mssqlConfig.style.display = isPostgres ? 'none' : 'block';
+            
+            // Update DBAccess fields automatically
+            dbAccessProfile.value = isPostgres ? 'POSTGRES' : 'MSSQL';
+            dbAccessServer.value = isPostgres ? 'totvs_postgres' : 'totvs_mssql';
+            dbAccessPort.value = isPostgres ? '5432' : '1433';
+            dbAccessUsername.value = isPostgres ? 'postgres' : 'sa';
+            
+            // Sync password
+            dbAccessPassword.value = isPostgres ? postgresPassword.value : mssqlPassword.value;
+        }
+
+        databaseTypeSelect.addEventListener('change', updateDatabaseConfig);
+        
+        // Initialize on page load
+        updateDatabaseConfig();
+
+        // Enable disabled fields before form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Temporarily enable disabled fields to include in FormData
+            dbAccessProfile.disabled = false;
+            dbAccessServer.disabled = false;
+            dbAccessPort.disabled = false;
+            dbAccessUsername.disabled = false;
+            dbAccessPassword.disabled = false;
+            
+            loading.style.display = 'block';
+            outputSection.style.display = 'none';
+            downloadBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const config = {
+                database_type: formData.get('database_type'),
+                timezone: formData.get('timezone'),
+                include_rest_server: formData.get('include_rest_server') === 'on',
+                network_name: formData.get('network_name'),
+                restart_policy: formData.get('restart_policy'),
+                
+                // Container names
+                postgres_container_name: formData.get('postgres_container_name'),
+                mssql_container_name: formData.get('mssql_container_name'),
+                licenseserver_container_name: formData.get('licenseserver_container_name'),
+                dbaccess_container_name: formData.get('dbaccess_container_name'),
+                appserver_container_name: formData.get('appserver_container_name'),
+                apprest_container_name: formData.get('apprest_container_name'),
+                
+                // PostgreSQL
+                postgres_user: 'postgres',
+                postgres_password: formData.get('postgres_password'),
+                postgres_db: formData.get('dbaccess_database_name'),
+                postgres_initdb_args: '--locale=pt_BR.ISO-8859-1 -E LATIN1',
+                postgres_external_port: parseInt(formData.get('postgres_external_port')),
+                postgres_volume_name: formData.get('postgres_volume_name'),
+                postgres_volume_bind: formData.get('postgres_volume_bind'),
+                
+                // MSSQL
+                mssql_sa_password: formData.get('mssql_sa_password'),
+                mssql_accept_eula: 'Y',
+                mssql_external_port: parseInt(formData.get('mssql_external_port')),
+                mssql_volume_name: formData.get('mssql_volume_name'),
+                mssql_volume_bind: formData.get('mssql_volume_bind'),
+                
+                // DBAccess
+                dbaccess_database_profile: formData.get('dbaccess_database_profile'),
+                dbaccess_database_server: formData.get('dbaccess_database_server'),
+                dbaccess_database_port: parseInt(formData.get('dbaccess_database_port')),
+                dbaccess_database_alias: formData.get('dbaccess_database_alias'),
+                dbaccess_database_name: formData.get('dbaccess_database_name'),
+                dbaccess_database_username: formData.get('dbaccess_database_username'),
+                dbaccess_database_password: formData.get('dbaccess_database_password'),
+                dbaccess_consolefile: formData.get('dbaccess_consolefile'),
+                dbaccess_version: formData.get('dbaccess_version'),
+                dbaccess_expose_ports: formData.get('dbaccess_expose_ports') === 'on',
+                dbaccess_port_7890: parseInt(formData.get('dbaccess_port_7890')),
+                dbaccess_port_7891: parseInt(formData.get('dbaccess_port_7891')),
+                
+                // License Server
+                license_tcp_port: parseInt(formData.get('license_tcp_port')),
+                license_port: parseInt(formData.get('license_port')),
+                license_webapp_port: parseInt(formData.get('license_webapp_port')),
+                license_consolefile: formData.get('license_consolefile'),
+                licenseserver_version: formData.get('licenseserver_version'),
+                licenseserver_expose_ports: formData.get('licenseserver_expose_ports') === 'on',
+                license_tcp_port_external: parseInt(formData.get('license_tcp_port_external')),
+                license_port_external: parseInt(formData.get('license_port_external')),
+                license_webapp_port_external: parseInt(formData.get('license_webapp_port_external')),
+                
+                // AppServer
+                appserver_release: formData.get('appserver_release'),
+                appserver_port: parseInt(formData.get('appserver_port')),
+                appserver_web_port: parseInt(formData.get('appserver_web_port')),
+                appserver_rest_port: parseInt(formData.get('appserver_rest_port')),
+                appserver_web_manager: parseInt(formData.get('appserver_web_manager')),
+                appserver_rpo_custom: formData.get('appserver_rpo_custom'),
+                appserver_consolefile: formData.get('appserver_consolefile'),
+                appserver_multiprotocolportsecure: parseInt(formData.get('appserver_multiprotocolportsecure')),
+                appserver_multiprotocolport: parseInt(formData.get('appserver_multiprotocolport')),
+                appserver_volume_name: formData.get('appserver_volume_name'),
+                appserver_volume_bind: formData.get('appserver_volume_bind'),
+                appserver_volume_apo: formData.get('appserver_volume_apo'),
+                appserver_volume_logs: formData.get('appserver_volume_logs'),
+                appserver_enable_volume_apo: formData.get('appserver_enable_volume_apo') === 'on',
+                appserver_enable_volume_logs: formData.get('appserver_enable_volume_logs') === 'on',
+                appserver_volume_apo_bind: formData.get('appserver_volume_apo_bind'),
+                appserver_volume_logs_bind: formData.get('appserver_volume_logs_bind'),
+                
+                // AppRest
+                apprest_port: parseInt(formData.get('apprest_port')),
+                apprest_web_port: parseInt(formData.get('apprest_web_port')),
+                apprest_rest_port: parseInt(formData.get('apprest_rest_port')),
+                apprest_web_manager: parseInt(formData.get('apprest_web_manager'))
+            };
+
+            try {
+                // Generate YAML locally using js-yaml
+                const yamlContent = generateDockerCompose(config);
+                
+                currentConfig = config;
+                currentYaml = yamlContent;
+                outputBox.textContent = yamlContent;
+                outputSection.style.display = 'block';
+                downloadBtn.disabled = false;
+                showAlert('success', '✅ Docker Compose gerado com sucesso!');
+            } catch (error) {
+                showAlert('error', '❌ Erro: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+                dbAccessProfile.disabled = true; // Re-disable after submission
+                dbAccessServer.disabled = true;
+                dbAccessPort.disabled = true;
+                dbAccessUsername.disabled = true;
+                dbAccessPassword.disabled = true;
+            }
+        });
+
+        function showAlert(type, message) {
+            const alert = type === 'success' ? successAlert : errorAlert;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        downloadBtn.addEventListener('click', async () => {
+            if (!currentYaml) return;
+
+            try {
+                // Create blob from YAML content
+                const blob = new Blob([currentYaml], { type: 'application/x-yaml' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `docker-compose-${currentConfig.database_type}.yaml`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showAlert('success', '✅ Download iniciado!');
+            } catch (error) {
+                showAlert('error', '❌ Erro ao fazer download: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
