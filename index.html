@@ -1185,6 +1185,64 @@
                                 <input type="number" id="apprest_web_manager" name="apprest_web_manager" value="25188">
                             </div>
                         </div>
+                        
+                        <h3 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes</h3>
+                        <div class="info-box">
+                            <strong>Nota:</strong> O AppRest compartilha os mesmos volumes do AppServer por padrão
+                        </div>
+                        
+                        <div class="checkbox-group" style="margin-top: 15px;">
+                            <input type="checkbox" id="apprest_use_own_volumes" name="apprest_use_own_volumes">
+                            <label for="apprest_use_own_volumes">Usar volumes independentes para o AppRest</label>
+                        </div>
+                        
+                        <div id="apprestVolumesConfig" style="display: none; margin-top: 15px;">
+                            <h4 style="color: #2a5298; margin-bottom: 15px;">Volume de Dados</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="apprest_volume_name">Nome do Volume de Dados</label>
+                                    <input type="text" id="apprest_volume_name" name="apprest_volume_name" value="totvs_apprest_data">
+                                </div>
+                                <div class="form-group">
+                                    <label for="apprest_volume_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                    <input type="text" id="apprest_volume_bind" name="apprest_volume_bind" placeholder="/caminho/no/host/apprest_data">
+                                </div>
+                            </div>
+                            
+                            <div class="checkbox-group" style="margin-top: 15px;">
+                                <input type="checkbox" id="apprest_enable_volume_apo" name="apprest_enable_volume_apo">
+                                <label for="apprest_enable_volume_apo">Habilitar volume para RPO (/totvs/protheus/apo)</label>
+                            </div>
+                            <div id="apprestVolumeApoConfig" style="display: none; margin-top: 15px;">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="apprest_volume_apo">Nome do Volume APO</label>
+                                        <input type="text" id="apprest_volume_apo" name="apprest_volume_apo" value="totvs_apprest_apo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="apprest_volume_apo_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                        <input type="text" id="apprest_volume_apo_bind" name="apprest_volume_apo_bind" placeholder="/caminho/no/host/apprest_apo">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="checkbox-group" style="margin-top: 15px;">
+                                <input type="checkbox" id="apprest_enable_volume_logs" name="apprest_enable_volume_logs">
+                                <label for="apprest_enable_volume_logs">Habilitar volume para Logs (/totvs/protheus/bin/appserver)</label>
+                            </div>
+                            <div id="apprestVolumeLogsConfig" style="display: none; margin-top: 15px;">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="apprest_volume_logs">Nome do Volume Logs</label>
+                                        <input type="text" id="apprest_volume_logs" name="apprest_volume_logs" value="totvs_apprest_logs">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="apprest_volume_logs_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                        <input type="text" id="apprest_volume_logs_bind" name="apprest_volume_logs_bind" placeholder="/caminho/no/host/apprest_logs">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -1280,6 +1338,12 @@
         const errorAlert = document.getElementById('errorAlert');
         const includeRestCheckbox = document.getElementById('include_rest_server');
         const restServerConfig = document.getElementById('restServerConfig');
+        const apprestUseOwnVolumes = document.getElementById('apprest_use_own_volumes');
+        const apprestVolumesConfig = document.getElementById('apprestVolumesConfig');
+        const apprestEnableVolumeApo = document.getElementById('apprest_enable_volume_apo');
+        const apprestVolumeApoConfig = document.getElementById('apprestVolumeApoConfig');
+        const apprestEnableVolumeLogs = document.getElementById('apprest_enable_volume_logs');
+        const apprestVolumeLogsConfig = document.getElementById('apprestVolumeLogsConfig');
         const databaseTypeSelect = document.getElementById('database_type');
         const postgresConfig = document.getElementById('postgresConfig');
         const mssqlConfig = document.getElementById('mssqlConfig');
@@ -1341,6 +1405,21 @@
         // Toggle REST server config
         includeRestCheckbox.addEventListener('change', function() {
             restServerConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle AppRest own volumes
+        apprestUseOwnVolumes.addEventListener('change', function() {
+            apprestVolumesConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle AppRest volume APO
+        apprestEnableVolumeApo.addEventListener('change', function() {
+            apprestVolumeApoConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle AppRest volume Logs
+        apprestEnableVolumeLogs.addEventListener('change', function() {
+            apprestVolumeLogsConfig.style.display = this.checked ? 'block' : 'none';
         });
         
         // Toggle volume APO config
@@ -1522,7 +1601,16 @@
                 apprest_port: parseInt(formData.get('apprest_port')),
                 apprest_web_port: parseInt(formData.get('apprest_web_port')),
                 apprest_rest_port: parseInt(formData.get('apprest_rest_port')),
-                apprest_web_manager: parseInt(formData.get('apprest_web_manager'))
+                apprest_web_manager: parseInt(formData.get('apprest_web_manager')),
+                apprest_use_own_volumes: formData.get('apprest_use_own_volumes') === 'on',
+                apprest_volume_name: formData.get('apprest_volume_name'),
+                apprest_volume_bind: formData.get('apprest_volume_bind'),
+                apprest_enable_volume_apo: formData.get('apprest_enable_volume_apo') === 'on',
+                apprest_volume_apo: formData.get('apprest_volume_apo'),
+                apprest_volume_apo_bind: formData.get('apprest_volume_apo_bind'),
+                apprest_enable_volume_logs: formData.get('apprest_enable_volume_logs') === 'on',
+                apprest_volume_logs: formData.get('apprest_volume_logs'),
+                apprest_volume_logs_bind: formData.get('apprest_volume_logs_bind')
             };
 
             try {

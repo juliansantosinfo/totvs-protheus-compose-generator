@@ -213,6 +213,12 @@ function generateDockerCompose(config) {
     
     // AppRest (optional)
     if (config.include_rest_server) {
+        // Determine which volumes to use
+        const useOwnVolumes = config.apprest_use_own_volumes;
+        const apprestDataVolume = useOwnVolumes 
+            ? (config.apprest_volume_bind ? `${config.apprest_volume_bind}:/totvs/protheus_data` : `${config.apprest_volume_name}:/totvs/protheus_data`)
+            : appserverVolume;
+        
         composeDict.services.apprest = {
             image: `juliansantosinfo/totvs_appserver:${config.appserver_release}`,
             container_name: config.apprest_container_name,
@@ -248,7 +254,7 @@ function generateDockerCompose(config) {
                 EXTRACT_RESOURCES: 'true',
                 TZ: config.timezone
             },
-            volumes: [appserverVolume],
+            volumes: [apprestDataVolume],
             networks: [config.network_name],
             depends_on: {
                 licenseserver: { condition: 'service_started' },
@@ -256,19 +262,37 @@ function generateDockerCompose(config) {
             }
         };
         
-        // Add optional volumes for AppRest
-        if (config.appserver_enable_volume_apo) {
-            if (config.appserver_volume_apo_bind) {
-                composeDict.services.apprest.volumes.push(`${config.appserver_volume_apo_bind}:/totvs/protheus/apo`);
-            } else {
-                composeDict.services.apprest.volumes.push(`${config.appserver_volume_apo}:/totvs/protheus/apo`);
+        // Add optional volumes for AppRest (only if using own volumes)
+        if (useOwnVolumes) {
+            if (config.apprest_enable_volume_apo) {
+                if (config.apprest_volume_apo_bind) {
+                    composeDict.services.apprest.volumes.push(`${config.apprest_volume_apo_bind}:/totvs/protheus/apo`);
+                } else {
+                    composeDict.services.apprest.volumes.push(`${config.apprest_volume_apo}:/totvs/protheus/apo`);
+                }
             }
-        }
-        if (config.appserver_enable_volume_logs) {
-            if (config.appserver_volume_logs_bind) {
-                composeDict.services.apprest.volumes.push(`${config.appserver_volume_logs_bind}:/totvs/protheus/bin/appserver`);
-            } else {
-                composeDict.services.apprest.volumes.push(`${config.appserver_volume_logs}:/totvs/protheus/bin/appserver`);
+            if (config.apprest_enable_volume_logs) {
+                if (config.apprest_volume_logs_bind) {
+                    composeDict.services.apprest.volumes.push(`${config.apprest_volume_logs_bind}:/totvs/protheus/bin/appserver`);
+                } else {
+                    composeDict.services.apprest.volumes.push(`${config.apprest_volume_logs}:/totvs/protheus/bin/appserver`);
+                }
+            }
+        } else {
+            // Share AppServer volumes
+            if (config.appserver_enable_volume_apo) {
+                if (config.appserver_volume_apo_bind) {
+                    composeDict.services.apprest.volumes.push(`${config.appserver_volume_apo_bind}:/totvs/protheus/apo`);
+                } else {
+                    composeDict.services.apprest.volumes.push(`${config.appserver_volume_apo}:/totvs/protheus/apo`);
+                }
+            }
+            if (config.appserver_enable_volume_logs) {
+                if (config.appserver_volume_logs_bind) {
+                    composeDict.services.apprest.volumes.push(`${config.appserver_volume_logs_bind}:/totvs/protheus/bin/appserver`);
+                } else {
+                    composeDict.services.apprest.volumes.push(`${config.appserver_volume_logs}:/totvs/protheus/bin/appserver`);
+                }
             }
         }
     }
@@ -284,6 +308,19 @@ function generateDockerCompose(config) {
     // Add appserver volume only if not using bind mount
     if (!config.appserver_volume_bind) {
         volumesDict[config.appserver_volume_name] = { driver: 'local' };
+    }
+    
+    // Add apprest volumes only if using own volumes and not bind mounts
+    if (config.include_rest_server && config.apprest_use_own_volumes) {
+        if (!config.apprest_volume_bind) {
+            volumesDict[config.apprest_volume_name] = { driver: 'local' };
+        }
+        if (config.apprest_enable_volume_apo && !config.apprest_volume_apo_bind) {
+            volumesDict[config.apprest_volume_apo] = { driver: 'local' };
+        }
+        if (config.apprest_enable_volume_logs && !config.apprest_volume_logs_bind) {
+            volumesDict[config.apprest_volume_logs] = { driver: 'local' };
+        }
     }
     
     // Only add volumes if not using bind mounts
