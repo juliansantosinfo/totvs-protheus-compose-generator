@@ -1111,7 +1111,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="appserver_volume_name">Nome do Volume de Dados</label>
-                            <input type="text" id="appserver_volume_name" name="appserver_volume_name" value="totvs_appserver_data">
+                            <input type="text" id="appserver_volume_name" name="appserver_volume_name" value="totvs_protheus_data">
                         </div>
                         <div class="form-group">
                             <label for="appserver_volume_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
@@ -1139,13 +1139,13 @@
                     
                     <div class="checkbox-group" style="margin-top: 15px;">
                         <input type="checkbox" id="appserver_enable_volume_logs" name="appserver_enable_volume_logs">
-                        <label for="appserver_enable_volume_logs">Habilitar volume para Logs (/totvs/protheus/bin/appserver)</label>
+                        <label for="appserver_enable_volume_logs">Habilitar volume para diretório appserver (/totvs/protheus/bin/appserver)</label>
                     </div>
                     <div id="volumeLogsConfig" style="display: none; margin-top: 15px;">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="appserver_volume_logs">Nome do Volume Logs</label>
-                                <input type="text" id="appserver_volume_logs" name="appserver_volume_logs" value="totvs_appserver_logs">
+                                <input type="text" id="appserver_volume_logs" name="appserver_volume_logs" value="totvs_appserver_data">
                             </div>
                             <div class="form-group">
                                 <label for="appserver_volume_logs_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
@@ -1210,13 +1210,13 @@
                         
                         <div class="checkbox-group" style="margin-top: 15px;">
                             <input type="checkbox" id="apprest_enable_volume_logs" name="apprest_enable_volume_logs">
-                            <label for="apprest_enable_volume_logs">Habilitar volume independente para Logs (/totvs/protheus/bin/appserver)</label>
+                            <label for="apprest_enable_volume_logs">Habilitar volume independente para diretório appserver (/totvs/protheus/bin/appserver)</label>
                         </div>
                         <div id="apprestVolumeLogsConfig" style="display: none; margin-top: 15px;">
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label for="apprest_volume_logs">Nome do Volume Logs</label>
-                                    <input type="text" id="apprest_volume_logs" name="apprest_volume_logs" value="totvs_apprest_logs">
+                                    <input type="text" id="apprest_volume_logs" name="apprest_volume_logs" value="totvs_apprest_data">
                                 </div>
                                 <div class="form-group">
                                     <label for="apprest_volume_logs_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
