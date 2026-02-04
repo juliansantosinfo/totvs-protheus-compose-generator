@@ -22,6 +22,19 @@
             --gh-text-secondary: #8b949e;
             --gh-accent: #58a6ff;
             --gh-accent-hover: #1f6feb;
+            
+            /* Bootstrap overrides */
+            --bs-body-bg: #0d1117;
+            --bs-body-color: #c9d1d9;
+            --bs-border-color: #30363d;
+            --bs-primary: #58a6ff;
+            --bs-primary-rgb: 88, 166, 255;
+            --bs-secondary: #21262d;
+            --bs-secondary-rgb: 33, 38, 45;
+            --bs-success: #3fb950;
+            --bs-danger: #f85149;
+            --bs-link-color: #58a6ff;
+            --bs-link-hover-color: #1f6feb;
         }
 
         body.light-theme {
@@ -33,6 +46,19 @@
             --gh-text-secondary: #57606a;
             --gh-accent: #0969da;
             --gh-accent-hover: #0550ae;
+            
+            /* Bootstrap overrides */
+            --bs-body-bg: #ffffff;
+            --bs-body-color: #24292f;
+            --bs-border-color: #d0d7de;
+            --bs-primary: #0969da;
+            --bs-primary-rgb: 9, 105, 218;
+            --bs-secondary: #f6f8fa;
+            --bs-secondary-rgb: 246, 248, 250;
+            --bs-success: #1a7f37;
+            --bs-danger: #cf222e;
+            --bs-link-color: #0969da;
+            --bs-link-hover-color: #0550ae;
         }
 
         body {
@@ -1151,6 +1177,11 @@
                     <strong>Como usar:</strong> Copie o conteúdo abaixo e salve como <code>docker-compose.yaml</code> ou clique em "Download YAML"
                 </div>
                 <div class="output-box" id="outputBox"></div>
+                
+                <div style="margin-top: 24px;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--gh-text-primary);">📋 Comandos Úteis</h3>
+                    <div class="output-box" id="commandsBox" style="font-size: 13px;"></div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
@@ -1211,6 +1242,7 @@
         const form = document.getElementById('configForm');
         const composeModal = document.getElementById('composeModal');
         const outputBox = document.getElementById('outputBox');
+        const commandsBox = document.getElementById('commandsBox');
         const downloadBtn = document.getElementById('downloadBtn');
         const loading = document.getElementById('loading');
         const successAlert = document.getElementById('successAlert');
@@ -1227,6 +1259,8 @@
         const dbAccessPassword = document.getElementById('dbaccess_database_password');
         const postgresPassword = document.getElementById('postgres_password');
         const mssqlPassword = document.getElementById('mssql_sa_password');
+        const postgresContainerName = document.getElementById('postgres_container_name');
+        const mssqlContainerName = document.getElementById('mssql_container_name');
         
         const enableVolumeApo = document.getElementById('appserver_enable_volume_apo');
         const volumeApoConfig = document.getElementById('volumeApoConfig');
@@ -1250,6 +1284,19 @@
         mssqlPassword.addEventListener('input', function() {
             if (databaseTypeSelect.value === 'mssql') {
                 dbAccessPassword.value = this.value;
+            }
+        });
+
+        // Sync database container name to DBAccess
+        postgresContainerName.addEventListener('input', function() {
+            if (databaseTypeSelect.value === 'postgresql') {
+                dbAccessServer.value = this.value;
+            }
+        });
+
+        mssqlContainerName.addEventListener('input', function() {
+            if (databaseTypeSelect.value === 'mssql') {
+                dbAccessServer.value = this.value;
             }
         });
 
@@ -1402,6 +1449,7 @@
                 currentConfig = config;
                 currentYaml = yamlContent;
                 outputBox.textContent = yamlContent;
+                commandsBox.textContent = generateDockerCommands(config);
                 composeModal.style.display = 'block';
                 showAlert('success', '✅ Docker Compose gerado com sucesso!');
             } catch (error) {
@@ -1448,6 +1496,45 @@
 
         function closeModal() {
             composeModal.style.display = 'none';
+        }
+
+        function generateDockerCommands(config) {
+            const dbService = config.database_type === 'postgresql' ? 'postgres' : 'mssql';
+            const services = ['licenseserver', 'dbaccess', 'appserver'];
+            if (config.include_rest_server) services.push('apprest');
+            
+            return `# Iniciar todos os serviços
+docker-compose up -d
+
+# Ver logs em tempo real
+docker-compose logs -f
+
+# Ver logs de um serviço específico
+docker-compose logs -f appserver
+
+# Parar todos os serviços
+docker-compose down
+
+# Parar e remover volumes (CUIDADO: apaga dados!)
+docker-compose down -v
+
+# Reiniciar um serviço
+docker-compose restart appserver
+
+# Ver status dos containers
+docker-compose ps
+
+# Acessar shell do AppServer
+docker exec -it ${config.appserver_container_name} bash
+
+# Acessar banco de dados
+docker exec -it ${config.database_type === 'postgresql' ? config.postgres_container_name : config.mssql_container_name} ${config.database_type === 'postgresql' ? 'psql -U postgres' : '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C'}
+
+# Ver uso de recursos
+docker stats
+
+# Backup do volume de dados (exemplo)
+docker run --rm -v ${config.database_type === 'postgresql' ? config.postgres_volume_name : config.mssql_volume_name}:/data -v $(pwd):/backup alpine tar czf /backup/db-backup.tar.gz /data`;
         }
 
         // Close modal on outside click
