@@ -834,8 +834,39 @@
                             <input type="text" id="timezone" name="timezone" value="America/Sao_Paulo" required>
                         </div>
                     </div>
+                    
+                    <div class="checkbox-group" style="margin-top: 15px;">
+                        <input type="checkbox" id="use_external_database" name="use_external_database">
+                        <label for="use_external_database">Usar banco de dados externo (não criar container)</label>
+                    </div>
+                    
+                    <div id="externalDatabaseConfig" style="display: none; margin-top: 20px;">
+                        <h3 style="color: #2a5298; margin-bottom: 15px;">Banco de Dados Externo</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="external_db_host">Host/IP do Banco</label>
+                                <input type="text" id="external_db_host" name="external_db_host" placeholder="192.168.1.100 ou db.exemplo.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="external_db_port">Porta</label>
+                                <input type="number" id="external_db_port" name="external_db_port" placeholder="5432 ou 1433">
+                            </div>
+                            <div class="form-group">
+                                <label for="external_db_username">Usuário</label>
+                                <input type="text" id="external_db_username" name="external_db_username" placeholder="postgres ou sa">
+                            </div>
+                            <div class="form-group">
+                                <label for="external_db_password">Senha</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="external_db_password" name="external_db_password">
+                                    <button type="button" class="toggle-password" onclick="togglePassword('external_db_password')">👁️</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- PostgreSQL Config -->
-                    <div id="postgresConfig" style="margin-top: 20px;">
+                    <div id="postgresConfig" style="margin-top: 20px; display: none;">
                         <h3 style="color: #2a5298; margin-bottom: 15px;">PostgreSQL</h3>
                         <div class="form-grid">
                             <div class="form-group">
@@ -1262,6 +1293,13 @@
         const postgresContainerName = document.getElementById('postgres_container_name');
         const mssqlContainerName = document.getElementById('mssql_container_name');
         
+        const useExternalDatabase = document.getElementById('use_external_database');
+        const externalDatabaseConfig = document.getElementById('externalDatabaseConfig');
+        const externalDbHost = document.getElementById('external_db_host');
+        const externalDbPort = document.getElementById('external_db_port');
+        const externalDbUsername = document.getElementById('external_db_username');
+        const externalDbPassword = document.getElementById('external_db_password');
+        
         const enableVolumeApo = document.getElementById('appserver_enable_volume_apo');
         const volumeApoConfig = document.getElementById('volumeApoConfig');
         const enableVolumeLogs = document.getElementById('appserver_enable_volume_logs');
@@ -1328,20 +1366,60 @@
         // Toggle database config based on type
         function updateDatabaseConfig() {
             const isPostgres = databaseTypeSelect.value === 'postgresql';
-            postgresConfig.style.display = isPostgres ? 'block' : 'none';
-            mssqlConfig.style.display = isPostgres ? 'none' : 'block';
+            const isExternal = useExternalDatabase.checked;
             
-            // Update DBAccess fields automatically
-            dbAccessProfile.value = isPostgres ? 'POSTGRES' : 'MSSQL';
-            dbAccessServer.value = isPostgres ? 'totvs_postgres' : 'totvs_mssql';
-            dbAccessPort.value = isPostgres ? '5432' : '1433';
-            dbAccessUsername.value = isPostgres ? 'postgres' : 'sa';
+            postgresConfig.style.display = !isExternal && isPostgres ? 'block' : 'none';
+            mssqlConfig.style.display = !isExternal && !isPostgres ? 'block' : 'none';
             
-            // Sync password
-            dbAccessPassword.value = isPostgres ? postgresPassword.value : mssqlPassword.value;
+            if (isExternal) {
+                // Update DBAccess with external database info
+                dbAccessProfile.value = isPostgres ? 'POSTGRES' : 'MSSQL';
+                dbAccessServer.value = externalDbHost.value || '';
+                dbAccessPort.value = externalDbPort.value || (isPostgres ? '5432' : '1433');
+                dbAccessUsername.value = externalDbUsername.value || (isPostgres ? 'postgres' : 'sa');
+                dbAccessPassword.value = externalDbPassword.value || '';
+            } else {
+                // Update DBAccess fields automatically for container
+                dbAccessProfile.value = isPostgres ? 'POSTGRES' : 'MSSQL';
+                dbAccessServer.value = isPostgres ? postgresContainerName.value : mssqlContainerName.value;
+                dbAccessPort.value = isPostgres ? '5432' : '1433';
+                dbAccessUsername.value = isPostgres ? 'postgres' : 'sa';
+                dbAccessPassword.value = isPostgres ? postgresPassword.value : mssqlPassword.value;
+            }
         }
 
         databaseTypeSelect.addEventListener('change', updateDatabaseConfig);
+        
+        // Toggle external database config
+        useExternalDatabase.addEventListener('change', function() {
+            externalDatabaseConfig.style.display = this.checked ? 'block' : 'none';
+            updateDatabaseConfig();
+        });
+        
+        // Sync external database fields to DBAccess
+        externalDbHost.addEventListener('input', function() {
+            if (useExternalDatabase.checked) {
+                dbAccessServer.value = this.value;
+            }
+        });
+        
+        externalDbPort.addEventListener('input', function() {
+            if (useExternalDatabase.checked) {
+                dbAccessPort.value = this.value;
+            }
+        });
+        
+        externalDbUsername.addEventListener('input', function() {
+            if (useExternalDatabase.checked) {
+                dbAccessUsername.value = this.value;
+            }
+        });
+        
+        externalDbPassword.addEventListener('input', function() {
+            if (useExternalDatabase.checked) {
+                dbAccessPassword.value = this.value;
+            }
+        });
         
         // Initialize on page load
         updateDatabaseConfig();
@@ -1364,6 +1442,11 @@
                 database_type: formData.get('database_type'),
                 timezone: formData.get('timezone'),
                 include_rest_server: formData.get('include_rest_server') === 'on',
+                use_external_database: formData.get('use_external_database') === 'on',
+                external_db_host: formData.get('external_db_host'),
+                external_db_port: parseInt(formData.get('external_db_port')) || (formData.get('database_type') === 'postgresql' ? 5432 : 1433),
+                external_db_username: formData.get('external_db_username'),
+                external_db_password: formData.get('external_db_password'),
                 network_name: formData.get('network_name'),
                 restart_policy: formData.get('restart_policy'),
                 
@@ -1503,7 +1586,7 @@
             const services = ['licenseserver', 'dbaccess', 'appserver'];
             if (config.include_rest_server) services.push('apprest');
             
-            return `# Iniciar todos os serviços
+            let commands = `# Iniciar todos os serviços
 docker-compose up -d
 
 # Ver logs em tempo real
@@ -1525,16 +1608,29 @@ docker-compose restart appserver
 docker-compose ps
 
 # Acessar shell do AppServer
-docker exec -it ${config.appserver_container_name} bash
+docker exec -it ${config.appserver_container_name} bash`;
+
+            // Only add database commands if not using external
+            if (!config.use_external_database) {
+                commands += `
 
 # Acessar banco de dados
 docker exec -it ${config.database_type === 'postgresql' ? config.postgres_container_name : config.mssql_container_name} ${config.database_type === 'postgresql' ? 'psql -U postgres' : '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C'}
 
-# Ver uso de recursos
-docker stats
-
 # Backup do volume de dados (exemplo)
 docker run --rm -v ${config.database_type === 'postgresql' ? config.postgres_volume_name : config.mssql_volume_name}:/data -v $(pwd):/backup alpine tar czf /backup/db-backup.tar.gz /data`;
+            } else {
+                commands += `
+
+# Nota: Usando banco de dados externo em ${config.external_db_host}:${config.external_db_port}`;
+            }
+
+            commands += `
+
+# Ver uso de recursos
+docker stats`;
+
+            return commands;
         }
 
         // Close modal on outside click

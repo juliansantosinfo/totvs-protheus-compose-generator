@@ -13,8 +13,9 @@ function generateDockerCompose(config) {
         services: {}
     };
     
-    // Database Service
-    if (config.database_type === 'postgresql') {
+    // Database Service (only if not using external)
+    if (!config.use_external_database) {
+        if (config.database_type === 'postgresql') {
         const postgresVolume = config.postgres_volume_bind ? 
             `${config.postgres_volume_bind}:${dbVolumePath}` : 
             `${config.postgres_volume_name}:${dbVolumePath}`;
@@ -68,6 +69,7 @@ function generateDockerCompose(config) {
                 start_period: '10s'
             }
         };
+    }
     }
     
     // License Server
@@ -130,7 +132,10 @@ function generateDockerCompose(config) {
         }
     };
     
-    dbAccessDict.depends_on[dbService] = { condition: 'service_healthy' };
+    // Only add database dependency if not using external
+    if (!config.use_external_database) {
+        dbAccessDict.depends_on[dbService] = { condition: 'service_healthy' };
+    }
     dbAccessDict.depends_on.licenseserver = { condition: 'service_started' };
     
     if (config.dbaccess_expose_ports) {
@@ -271,8 +276,8 @@ function generateDockerCompose(config) {
     // Volumes
     const volumesDict = {};
     
-    // Add database volume only if not using bind mount
-    if (!dbVolumeBind) {
+    // Add database volume only if not using bind mount and not external
+    if (!config.use_external_database && !dbVolumeBind) {
         volumesDict[dbVolumeName] = { driver: 'local' };
     }
     
