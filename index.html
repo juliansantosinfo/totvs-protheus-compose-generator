@@ -1160,7 +1160,7 @@
                     <h2 class="section-title">🌐 Servidor REST (Opcional)</h2>
                     <div class="checkbox-group">
                         <input type="checkbox" id="include_rest_server" name="include_rest_server">
-                        <label for="include_rest_server">Incluir servidor REST dedicado (perfil full)</label>
+                        <label for="include_rest_server">Incluir servidor REST dedicado</label>
                     </div>
                     <div id="restServerConfig" style="display: none; margin-top: 20px;">
                         <div class="form-grid">
@@ -1222,6 +1222,52 @@
                                     <label for="apprest_volume_logs_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
                                     <input type="text" id="apprest_volume_logs_bind" name="apprest_volume_logs_bind" placeholder="/caminho/no/host/apprest_logs">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SmartView Configuration -->
+                <div class="section">
+                    <h2 class="section-title">📊 SmartView (Opcional)</h2>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="include_smartview" name="include_smartview">
+                        <label for="include_smartview">Incluir servidor SmartView (requer servidor REST)</label>
+                    </div>
+                    <div id="smartviewConfig" style="display: none; margin-top: 20px;">
+                        <div class="info-box">
+                            <strong>Atenção:</strong> O SmartView requer o servidor REST ativo. Ao habilitar esta opção, o servidor REST será automaticamente incluído.
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="smartview_container_name">Nome do Container</label>
+                                <input type="text" id="smartview_container_name" name="smartview_container_name" value="totvs_smartview">
+                            </div>
+                            <div class="form-group">
+                                <label for="smartview_version">Versão</label>
+                                <select id="smartview_version" name="smartview_version" required>
+                                    <option value="3.9.0.4558336" selected>3.9.0.4558336</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="smartview_app_port">Porta Aplicação (externa)</label>
+                                <input type="number" id="smartview_app_port" name="smartview_app_port" value="7017">
+                            </div>
+                            <div class="form-group">
+                                <label for="smartview_config_port">Porta Configuração (externa)</label>
+                                <input type="number" id="smartview_config_port" name="smartview_config_port" value="7019">
+                            </div>
+                            <div class="form-group">
+                                <label for="smartview_rest_server">Servidor REST</label>
+                                <input type="text" id="smartview_rest_server" name="smartview_rest_server" value="totvs_apprest" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="smartview_rest_port">Porta REST</label>
+                                <input type="number" id="smartview_rest_port" name="smartview_rest_port" value="25180" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="smartview_discovery_url">URL de Descoberta</label>
+                                <input type="text" id="smartview_discovery_url" name="smartview_discovery_url" value="http://totvs_apprest:25180/rest/.well-known/treports/security" readonly>
                             </div>
                         </div>
                     </div>
@@ -1336,6 +1382,14 @@
         const postgresContainerName = document.getElementById('postgres_container_name');
         const mssqlContainerName = document.getElementById('mssql_container_name');
         
+        const includeSmartviewCheckbox = document.getElementById('include_smartview');
+        const smartviewConfig = document.getElementById('smartviewConfig');
+        const smartviewRestServer = document.getElementById('smartview_rest_server');
+        const smartviewRestPort = document.getElementById('smartview_rest_port');
+        const smartviewDiscoveryUrl = document.getElementById('smartview_discovery_url');
+        const apprestContainerName = document.getElementById('apprest_container_name');
+        const apprestRestPort = document.getElementById('apprest_rest_port');
+        
         const useExternalDatabase = document.getElementById('use_external_database');
         const externalDatabaseConfig = document.getElementById('externalDatabaseConfig');
         const externalDbHost = document.getElementById('external_db_host');
@@ -1384,6 +1438,31 @@
         // Toggle REST server config
         includeRestCheckbox.addEventListener('change', function() {
             restServerConfig.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle SmartView config
+        includeSmartviewCheckbox.addEventListener('change', function() {
+            smartviewConfig.style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                // Force REST server to be enabled
+                includeRestCheckbox.checked = true;
+                includeRestCheckbox.disabled = true;
+                restServerConfig.style.display = 'block';
+            } else {
+                includeRestCheckbox.disabled = false;
+            }
+        });
+        
+        // Sync AppRest container name to SmartView
+        apprestContainerName.addEventListener('input', function() {
+            smartviewRestServer.value = this.value;
+            smartviewDiscoveryUrl.value = `http://${this.value}:${apprestRestPort.value}/rest/.well-known/treports/security`;
+        });
+        
+        // Sync AppRest REST port to SmartView
+        apprestRestPort.addEventListener('input', function() {
+            smartviewRestPort.value = this.value;
+            smartviewDiscoveryUrl.value = `http://${apprestContainerName.value}:${this.value}/rest/.well-known/treports/security`;
         });
         
         // Toggle AppRest volume APO
@@ -1487,6 +1566,8 @@
             dbAccessPort.disabled = false;
             dbAccessUsername.disabled = false;
             dbAccessPassword.disabled = false;
+            smartviewRestServer.disabled = false;
+            smartviewRestPort.disabled = false;
             
             loading.style.display = 'block';
 
@@ -1494,7 +1575,8 @@
             const config = {
                 database_type: formData.get('database_type'),
                 timezone: formData.get('timezone'),
-                include_rest_server: formData.get('include_rest_server') === 'on',
+                include_smartview: formData.get('include_smartview') === 'on',
+                include_rest_server: formData.get('include_rest_server') === 'on' || formData.get('include_smartview') === 'on', // Force REST if SmartView is enabled
                 use_external_database: formData.get('use_external_database') === 'on',
                 external_db_host: formData.get('external_db_host'),
                 external_db_port: parseInt(formData.get('external_db_port')) || (formData.get('database_type') === 'postgresql' ? 5432 : 1433),
@@ -1581,7 +1663,16 @@
                 apprest_volume_apo_bind: formData.get('apprest_volume_apo_bind'),
                 apprest_enable_volume_logs: formData.get('apprest_enable_volume_logs') === 'on',
                 apprest_volume_logs: formData.get('apprest_volume_logs'),
-                apprest_volume_logs_bind: formData.get('apprest_volume_logs_bind')
+                apprest_volume_logs_bind: formData.get('apprest_volume_logs_bind'),
+                
+                // SmartView
+                smartview_container_name: formData.get('smartview_container_name'),
+                smartview_version: formData.get('smartview_version'),
+                smartview_app_port: parseInt(formData.get('smartview_app_port')),
+                smartview_config_port: parseInt(formData.get('smartview_config_port')),
+                smartview_rest_server: formData.get('smartview_rest_server'),
+                smartview_rest_port: parseInt(formData.get('smartview_rest_port')),
+                smartview_discovery_url: formData.get('smartview_discovery_url')
             };
 
             try {
@@ -1603,6 +1694,8 @@
                 dbAccessPort.disabled = true;
                 dbAccessUsername.disabled = true;
                 dbAccessPassword.disabled = true;
+                smartviewRestServer.disabled = true;
+                smartviewRestPort.disabled = true;
             }
         });
 
@@ -1644,6 +1737,7 @@
             const dbService = config.database_type === 'postgresql' ? 'postgres' : 'mssql';
             const services = ['licenseserver', 'dbaccess', 'appserver'];
             if (config.include_rest_server) services.push('apprest');
+            if (config.include_smartview) services.push('smartview');
             
             let commands = `# Iniciar todos os serviços
 docker-compose up -d
@@ -1682,6 +1776,14 @@ docker run --rm -v ${config.database_type === 'postgresql' ? config.postgres_vol
                 commands += `
 
 # Nota: Usando banco de dados externo em ${config.external_db_host}:${config.external_db_port}`;
+            }
+
+            if (config.include_smartview) {
+                commands += `
+
+# Acessar SmartView
+# Aplicação: http://localhost:${config.smartview_app_port}
+# Configuração: http://localhost:${config.smartview_config_port}`;
             }
 
             commands += `
