@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tests - TOTVS Protheus Docker Compose Generator</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+        .test {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #8b949e;
+        }
+        .test.pass {
+            border-left-color: #3fb950;
+            background: rgba(46, 160, 67, 0.1);
+        }
+        .test.fail {
+            border-left-color: #f85149;
+            background: rgba(248, 81, 73, 0.1);
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Unit Tests</h1>
+    <div id="results"></div>
+    <div id="summary" class="summary"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script src="generator.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        const summary = document.getElementById('summary');
+        let passed = 0;
+        let failed = 0;
+
+        function test(name, fn) {
+            const div = document.createElement('div');
+            div.className = 'test';
+            try {
+                fn();
+                div.classList.add('pass');
+                div.textContent = `✅ ${name}`;
+                passed++;
+            } catch (error) {
+                div.classList.add('fail');
+                div.textContent = `❌ ${name}: ${error.message}`;
+                failed++;
+            }
+            results.appendChild(div);
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEquals(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, got ${actual}`);
+            }
+        }
+
+        function assertContains(str, substring, message) {
+            if (!str.includes(substring)) {
+                throw new Error(message || `Expected string to contain "${substring}"`);
+            }
+        }
+
+        // Test Suite
+        test('generateDockerCompose returns string', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assert(typeof result === 'string', 'Result should be a string');
+        });
+
+        test('generateDockerCompose includes version', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'version:', 'Should contain version');
+        });
+
+        test('generateDockerCompose includes services', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'services:', 'Should contain services');
+        });
+
+        test('generateDockerCompose includes licenseserver', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'licenseserver:', 'Should contain licenseserver');
+        });
+
+        test('generateDockerCompose includes dbaccess', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'dbaccess:', 'Should contain dbaccess');
+        });
+
+        test('generateDockerCompose includes appserver', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'appserver:', 'Should contain appserver');
+        });
+
+        test('generateDockerCompose includes postgres when selected', () => {
+            const config = getMinimalConfig();
+            config.database_type = 'postgresql';
+            config.use_external_database = false;
+            const result = generateDockerCompose(config);
+            assertContains(result, 'postgres:', 'Should contain postgres service');
+        });
+
+        test('generateDockerCompose includes mssql when selected', () => {
+            const config = getMinimalConfig();
+            config.database_type = 'mssql';
+            config.use_external_database = false;
+            const result = generateDockerCompose(config);
+            assertContains(result, 'mssql:', 'Should contain mssql service');
+        });
+
+        test('generateDockerCompose excludes database when external', () => {
+            const config = getMinimalConfig();
+            config.use_external_database = true;
+            const result = generateDockerCompose(config);
+            assert(!result.includes('postgres:') && !result.includes('mssql:'), 
+                'Should not contain database service when external');
+        });
+
+        test('generateDockerCompose includes apprest when enabled', () => {
+            const config = getMinimalConfig();
+            config.include_rest_server = true;
+            const result = generateDockerCompose(config);
+            assertContains(result, 'apprest:', 'Should contain apprest service');
+        });
+
+        test('generateDockerCompose includes smartview when enabled', () => {
+            const config = getMinimalConfig();
+            config.include_rest_server = true;
+            config.include_smartview = true;
+            const result = generateDockerCompose(config);
+            assertContains(result, 'smartview:', 'Should contain smartview service');
+        });
+
+        test('generateDockerCompose includes networks', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'networks:', 'Should contain networks');
+        });
+
+        test('generateDockerCompose includes volumes', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'volumes:', 'Should contain volumes');
+        });
+
+        test('generateDockerCompose throws on invalid config', () => {
+            try {
+                generateDockerCompose(null);
+                throw new Error('Should have thrown error');
+            } catch (error) {
+                assert(error.message.includes('inválida'), 'Should throw invalid config error');
+            }
+        });
+
+        test('generateDockerCompose handles bind mounts', () => {
+            const config = getMinimalConfig();
+            config.appserver_volume_bind = '/host/path';
+            const result = generateDockerCompose(config);
+            assertContains(result, '/host/path', 'Should contain bind mount path');
+        });
+
+        test('generateDockerCompose includes environment variables', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'environment:', 'Should contain environment section');
+        });
+
+        test('generateDockerCompose includes healthchecks', () => {
+            const config = getMinimalConfig();
+            config.use_external_database = false;
+            const result = generateDockerCompose(config);
+            assertContains(result, 'healthcheck:', 'Should contain healthcheck');
+        });
+
+        test('generateDockerCompose includes depends_on', () => {
+            const config = getMinimalConfig();
+            const result = generateDockerCompose(config);
+            assertContains(result, 'depends_on:', 'Should contain depends_on');
+        });
+
+        test('generateDockerCompose includes restart policy', () => {
+            const config = getMinimalConfig();
+            config.restart_policy = 'always';
+            const result = generateDockerCompose(config);
+            assertContains(result, 'restart: always', 'Should contain restart policy');
+        });
+
+        test('generateDockerCompose includes timezone', () => {
+            const config = getMinimalConfig();
+            config.timezone = 'America/Sao_Paulo';
+            const result = generateDockerCompose(config);
+            assertContains(result, 'America/Sao_Paulo', 'Should contain timezone');
+        });
+
+        test('generateDockerCompose includes SmartView discovery URL', () => {
+            const config = getMinimalConfig();
+            config.include_rest_server = true;
+            config.include_smartview = true;
+            config.smartview_discovery_url = 'http://totvs_apprest:25180/rest/.well-known/treports/security';
+            const result = generateDockerCompose(config);
+            assertContains(result, 'SMARTVIEW_DISCOVERY_URL', 'Should contain discovery URL');
+        });
+
+        // Helper function
+        function getMinimalConfig() {
+            return {
+                database_type: 'postgresql',
+                timezone: 'America/Sao_Paulo',
+                include_smartview: false,
+                include_rest_server: false,
+                use_external_database: false,
+                network_name: 'totvs',
+                restart_policy: 'unless-stopped',
+                postgres_container_name: 'totvs_postgres',
+                mssql_container_name: 'totvs_mssql',
+                licenseserver_container_name: 'totvs_licenseserver',
+                dbaccess_container_name: 'totvs_dbaccess',
+                appserver_container_name: 'totvs_appserver',
+                apprest_container_name: 'totvs_apprest',
+                smartview_container_name: 'totvs_smartview',
+                postgres_user: 'postgres',
+                postgres_password: 'password',
+                postgres_db: 'protheus',
+                postgres_initdb_args: '--locale=pt_BR.ISO-8859-1 -E LATIN1',
+                postgres_external_port: 5432,
+                postgres_volume_name: 'totvs_postgres_data',
+                postgres_volume_bind: '',
+                mssql_sa_password: 'Password123!',
+                mssql_accept_eula: 'Y',
+                mssql_external_port: 1433,
+                mssql_volume_name: 'totvs_mssql_data',
+                mssql_volume_bind: '',
+                dbaccess_database_profile: 'POSTGRES',
+                dbaccess_database_server: 'totvs_postgres',
+                dbaccess_database_port: 5432,
+                dbaccess_database_alias: 'PROTHEUS',
+                dbaccess_database_name: 'protheus',
+                dbaccess_database_username: 'postgres',
+                dbaccess_database_password: 'password',
+                dbaccess_consolefile: 'dbaccess.log',
+                dbaccess_version: '20.3.3.3',
+                dbaccess_expose_ports: false,
+                dbaccess_port_7890: 7890,
+                dbaccess_port_7891: 7891,
+                license_tcp_port: 2234,
+                license_port: 5555,
+                license_webapp_port: 8020,
+                license_consolefile: 'licenseserver.log',
+                licenseserver_version: '20.3.3.3',
+                licenseserver_expose_ports: false,
+                license_tcp_port_external: 2234,
+                license_port_external: 5555,
+                license_webapp_port_external: 8020,
+                appserver_release: '20.3.3.3',
+                appserver_port: 1234,
+                appserver_web_port: 8080,
+                appserver_rest_port: 8081,
+                appserver_web_manager: 8090,
+                appserver_rpo_custom: '',
+                appserver_consolefile: 'appserver.log',
+                appserver_multiprotocolportsecure: 1,
+                appserver_multiprotocolport: 1234,
+                appserver_volume_name: 'totvs_protheus_data',
+                appserver_volume_bind: '',
+                appserver_volume_apo: 'totvs_protheus_apo',
+                appserver_volume_logs: 'totvs_protheus_logs',
+                appserver_enable_volume_apo: false,
+                appserver_enable_volume_logs: false,
+                appserver_volume_apo_bind: '',
+                appserver_volume_logs_bind: '',
+                apprest_port: 2345,
+                apprest_web_port: 25180,
+                apprest_rest_port: 25180,
+                apprest_web_manager: 25190,
+                apprest_enable_volume_apo: false,
+                apprest_volume_apo: 'totvs_apprest_apo',
+                apprest_volume_apo_bind: '',
+                apprest_enable_volume_logs: false,
+                apprest_volume_logs: 'totvs_apprest_logs',
+                apprest_volume_logs_bind: '',
+                smartview_version: '3.9.0.4558336',
+                smartview_app_port: 7017,
+                smartview_config_port: 7019,
+                smartview_rest_server: 'totvs_apprest',
+                smartview_rest_port: 25180,
+                smartview_discovery_url: 'http://totvs_apprest:25180/rest/.well-known/treports/security'
+            };
+        }
+
+        // Display summary
+        summary.innerHTML = `
+            <h2>Summary</h2>
+            <p>Total: ${passed + failed}</p>
+            <p style="color: #3fb950;">Passed: ${passed}</p>
+            <p style="color: #f85149;">Failed: ${failed}</p>
+            <p>Success Rate: ${((passed / (passed + failed)) * 100).toFixed(1)}%</p>
+        `;
+    </script>
+</body>
+</html>

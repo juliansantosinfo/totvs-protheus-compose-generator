@@ -1,17 +1,22 @@
 // Generator function to create docker-compose YAML
 function generateDockerCompose(config) {
-    const dbService = config.database_type === 'postgresql' ? 'postgres' : 'mssql';
-    const dbContainer = config.database_type === 'postgresql' ? config.postgres_container_name : config.mssql_container_name;
-    const dbInternalPort = config.database_type === 'postgresql' ? 5432 : 1433;
-    const dbExternalPort = config.database_type === 'postgresql' ? config.postgres_external_port : config.mssql_external_port;
-    const dbVolumeName = config.database_type === 'postgresql' ? config.postgres_volume_name : config.mssql_volume_name;
-    const dbVolumeBind = config.database_type === 'postgresql' ? config.postgres_volume_bind : config.mssql_volume_bind;
-    const dbVolumePath = config.database_type === 'postgresql' ? '/var/lib/postgresql/data' : '/var/opt/mssql/data';
-    
-    const composeDict = {
-        version: '3.8',
-        services: {}
-    };
+    try {
+        if (!config || typeof config !== 'object') {
+            throw new Error('Configuração inválida');
+        }
+        
+        const dbService = config.database_type === 'postgresql' ? 'postgres' : 'mssql';
+        const dbContainer = config.database_type === 'postgresql' ? config.postgres_container_name : config.mssql_container_name;
+        const dbInternalPort = config.database_type === 'postgresql' ? 5432 : 1433;
+        const dbExternalPort = config.database_type === 'postgresql' ? config.postgres_external_port : config.mssql_external_port;
+        const dbVolumeName = config.database_type === 'postgresql' ? config.postgres_volume_name : config.mssql_volume_name;
+        const dbVolumeBind = config.database_type === 'postgresql' ? config.postgres_volume_bind : config.mssql_volume_bind;
+        const dbVolumePath = config.database_type === 'postgresql' ? '/var/lib/postgresql/data' : '/var/opt/mssql/data';
+        
+        const composeDict = {
+            version: '3.8',
+            services: {}
+        };
     
     // Database Service (only if not using external)
     if (!config.use_external_database) {
@@ -350,4 +355,8 @@ function generateDockerCompose(config) {
     composeDict.networks[config.network_name] = { driver: 'bridge' };
     
     return jsyaml.dump(composeDict, { lineWidth: -1, noRefs: true });
+    } catch (error) {
+        console.error('Error generating docker-compose:', error);
+        throw new Error(`Falha ao gerar docker-compose: ${error.message}`);
+    }
 }
