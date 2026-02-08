@@ -885,6 +885,14 @@
                                 <input type="number" id="postgres_external_port" name="postgres_external_port" value="25432">
                             </div>
                         </div>
+
+                        <div class="checkbox-group" style="margin-top: 15px;">
+                            <input type="checkbox" id="postgres_restore_backup" name="postgres_restore_backup" checked>
+                            <label for="postgres_restore_backup">Restaurar backup base automaticamente (RESTORE_BACKUP)</label>
+                        </div>
+                        <div id="postgres_restore_warning" style="display: none; margin-top: 10px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
+                            ℹ️ O banco de dados será criado automaticamente no primeiro acesso ao Protheus.
+                        </div>
                         
                         <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
                         <div class="form-grid">
@@ -918,6 +926,14 @@
                                 <label for="mssql_external_port">Porta Externa</label>
                                 <input type="number" id="mssql_external_port" name="mssql_external_port" value="25433">
                             </div>
+                        </div>
+
+                        <div class="checkbox-group" style="margin-top: 15px;">
+                            <input type="checkbox" id="mssql_restore_backup" name="mssql_restore_backup" checked>
+                            <label for="mssql_restore_backup">Restaurar backup base automaticamente (RESTORE_BACKUP)</label>
+                        </div>
+                        <div id="mssql_restore_warning" style="display: none; margin-top: 10px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
+                            ℹ️ O banco de dados será criado automaticamente no primeiro acesso ao Protheus.
                         </div>
                         
                         <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
@@ -1405,9 +1421,22 @@
         const dbAccessPortsConfig = document.getElementById('dbAccessPortsConfig');
         const licenseServerExposePorts = document.getElementById('licenseserver_expose_ports');
         const licenseServerPortsConfig = document.getElementById('licenseServerPortsConfig');
+        const postgresRestoreBackup = document.getElementById('postgres_restore_backup');
+        const postgresRestoreWarning = document.getElementById('postgres_restore_warning');
+        const mssqlRestoreBackup = document.getElementById('mssql_restore_backup');
+        const mssqlRestoreWarning = document.getElementById('mssql_restore_warning');
 
         let currentConfig = null;
         let currentYaml = null;
+
+        // Toggle RESTORE_BACKUP warnings
+        postgresRestoreBackup.addEventListener('change', function() {
+            postgresRestoreWarning.style.display = this.checked ? 'none' : 'block';
+        });
+
+        mssqlRestoreBackup.addEventListener('change', function() {
+            mssqlRestoreWarning.style.display = this.checked ? 'none' : 'block';
+        });
 
         // Sync database password to DBAccess
         postgresPassword.addEventListener('input', function() {
@@ -1601,6 +1630,7 @@
                 postgres_external_port: parseInt(formData.get('postgres_external_port')),
                 postgres_volume_name: formData.get('postgres_volume_name'),
                 postgres_volume_bind: formData.get('postgres_volume_bind'),
+                postgres_restore_backup: formData.get('postgres_restore_backup') === 'on',
                 
                 // MSSQL
                 mssql_sa_password: formData.get('mssql_sa_password'),
@@ -1608,6 +1638,7 @@
                 mssql_external_port: parseInt(formData.get('mssql_external_port')),
                 mssql_volume_name: formData.get('mssql_volume_name'),
                 mssql_volume_bind: formData.get('mssql_volume_bind'),
+                mssql_restore_backup: formData.get('mssql_restore_backup') === 'on',
                 
                 // DBAccess
                 dbaccess_database_profile: formData.get('dbaccess_database_profile'),

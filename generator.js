@@ -31,6 +31,7 @@ function generateDockerCompose(config) {
                 POSTGRES_PASSWORD: config.postgres_password,
                 POSTGRES_DB: config.postgres_db,
                 POSTGRES_INITDB_ARGS: config.postgres_initdb_args,
+                RESTORE_BACKUP: config.postgres_restore_backup ? 'Y' : 'N',
                 TZ: config.timezone
             },
             volumes: [postgresVolume],
@@ -57,6 +58,7 @@ function generateDockerCompose(config) {
             environment: {
                 SA_PASSWORD: config.mssql_sa_password,
                 ACCEPT_EULA: config.mssql_accept_eula,
+                RESTORE_BACKUP: config.mssql_restore_backup ? 'Y' : 'N',
                 TZ: config.timezone
             },
             volumes: [mssqlVolume],
