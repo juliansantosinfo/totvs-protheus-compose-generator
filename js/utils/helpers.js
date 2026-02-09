@@ -8,14 +8,15 @@
  * Helper function to return value or environment variable reference
  * @param {*} value - The actual value to use
  * @param {string} envVar - The environment variable name
- * @param {boolean} useEnv - Whether to use environment variables
  * @returns {string|*} Environment variable reference or actual value
  * @example
- * val('postgres', 'DB_USER', true) // Returns '${DB_USER}'
- * val('postgres', 'DB_USER', false) // Returns 'postgres'
+ * val('postgres', 'DB_USER') // Returns '${DB_USER}' if config.use_env_file is true
+ * val('postgres', 'DB_USER') // Returns 'postgres' if config.use_env_file is false
+ * @note Reads config.use_env_file from global scope
  */
-function val(value, envVar, useEnv) {
-    return useEnv ? `\${${envVar}}` : value;
+function val(value, envVar) {
+    // Check if we should use env vars (from config passed to generator)
+    return window._currentConfig?.use_env_file ? `\${${envVar}}` : value;
 }
 
 /**

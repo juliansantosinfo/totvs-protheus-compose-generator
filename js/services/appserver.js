@@ -69,14 +69,14 @@ function generateAppServerService(config, mode = 'application') {
     const webManager = isRest ? config.apprest_web_manager : config.appserver_web_manager;
     
     return {
-        image: `juliansantosinfo/totvs_appserver:${config.appserver_release}`,
-        container_name: containerName,
-        restart: config.restart_policy,
+        image: `juliansantosinfo/totvs_appserver:${val(config.appserver_release, 'APPSERVER_RELEASE')}`,
+        container_name: val(containerName, isRest ? 'APPREST_CONTAINER_NAME' : 'APPSERVER_CONTAINER_NAME'),
+        restart: val(config.restart_policy, 'RESTART_POLICY'),
         ports: [
-            `${port}:${port}`,
-            `${webPort}:${webPort}`,
-            `${restPort}:${restPort}`,
-            `${webManager}:${webManager}`
+            `${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}:${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}`,
+            `${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}:${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}`,
+            `${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}:${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}`,
+            `${val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER')}:${val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER')}`
         ],
         ulimits: {
             nofile: {
@@ -86,25 +86,25 @@ function generateAppServerService(config, mode = 'application') {
         },
         environment: {
             APPSERVER_MODE: mode,
-            APPSERVER_RPO_CUSTOM: config.appserver_rpo_custom,
-            APPSERVER_DBACCESS_DATABASE: config.dbaccess_database_profile,
+            APPSERVER_RPO_CUSTOM: val(config.appserver_rpo_custom, 'APPSERVER_RPO_CUSTOM'),
+            APPSERVER_DBACCESS_DATABASE: val(config.dbaccess_database_profile, 'DBACCESS_DATABASE_PROFILE'),
             APPSERVER_DBACCESS_SERVER: 'totvs_dbaccess',
             APPSERVER_DBACCESS_PORT: 7890,
-            APPSERVER_DBACCESS_ALIAS: config.dbaccess_database_alias,
-            APPSERVER_CONSOLEFILE: config.appserver_consolefile,
-            APPSERVER_MULTIPROTOCOLPORTSECURE: config.appserver_multiprotocolportsecure,
-            APPSERVER_MULTIPROTOCOLPORT: config.appserver_multiprotocolport,
-            APPSERVER_LICENSE_SERVER: config.licenseserver_container_name,
-            APPSERVER_LICENSE_PORT: config.license_port,
-            APPSERVER_PORT: port,
-            APPSERVER_WEB_PORT: webPort,
-            APPSERVER_REST_PORT: restPort,
-            APPSERVER_WEB_MANAGER: webManager,
+            APPSERVER_DBACCESS_ALIAS: val(config.dbaccess_database_alias, 'DBACCESS_DATABASE_ALIAS'),
+            APPSERVER_CONSOLEFILE: val(config.appserver_consolefile, 'APPSERVER_CONSOLEFILE'),
+            APPSERVER_MULTIPROTOCOLPORTSECURE: val(config.appserver_multiprotocolportsecure, 'APPSERVER_MULTIPROTOCOLPORTSECURE'),
+            APPSERVER_MULTIPROTOCOLPORT: val(config.appserver_multiprotocolport, 'APPSERVER_MULTIPROTOCOLPORT'),
+            APPSERVER_LICENSE_SERVER: val(config.licenseserver_container_name, 'LICENSESERVER_CONTAINER_NAME'),
+            APPSERVER_LICENSE_PORT: val(config.license_port, 'LICENSE_PORT'),
+            APPSERVER_PORT: val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT'),
+            APPSERVER_WEB_PORT: val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT'),
+            APPSERVER_REST_PORT: val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT'),
+            APPSERVER_WEB_MANAGER: val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER'),
             EXTRACT_RESOURCES: 'true',
-            TZ: config.timezone
+            TZ: val(config.timezone, 'TZ')
         },
         volumes: volumes,
-        networks: [config.network_name],
+        networks: [val(config.network_name, 'NETWORK_NAME')],
         depends_on: {
             licenseserver: { condition: 'service_started' },
             dbaccess: { condition: 'service_healthy' }

@@ -10,7 +10,22 @@
     
     <!-- js-yaml -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
-    <script src="generator.js"></script>
+    <!-- Modular Generator -->
+    <!-- Utilities -->
+    <script src="js/utils/helpers.js"></script>
+    
+    <!-- Services -->
+    <script src="js/services/postgres.js"></script>
+    <script src="js/services/mssql.js"></script>
+    <script src="js/services/licenseserver.js"></script>
+    <script src="js/services/dbaccess.js"></script>
+    <script src="js/services/appserver.js"></script>
+    <script src="js/services/smartview.js"></script>
+    
+    <!-- Generators -->
+    <script src="js/generators/compose.js"></script>
+    <script src="js/generators/env.js"></script>
+    <script src="js/generator.js"></script>
     
     <style>
         :root {
@@ -801,6 +816,12 @@
                 <!-- Network Configuration -->
                 <div class="section">
                     <h2 class="section-title">🌐 Configuração de Rede</h2>
+                    
+                    <div class="checkbox-group" style="margin-bottom: 20px;">
+                        <input type="checkbox" id="use_env_file" name="use_env_file">
+                        <label for="use_env_file">Usar arquivo .env (variáveis de ambiente) no docker-compose.yaml</label>
+                    </div>
+                    
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="network_name">Nome da Rede Docker</label>
@@ -1624,6 +1645,7 @@
                 include_smartview: formData.get('include_smartview') === 'on',
                 include_rest_server: formData.get('include_rest_server') === 'on' || formData.get('include_smartview') === 'on', // Force REST if SmartView is enabled
                 use_external_database: formData.get('use_external_database') === 'on',
+                use_env_file: formData.get('use_env_file') === 'on',
                 external_db_host: formData.get('external_db_host'),
                 external_db_port: parseInt(formData.get('external_db_port')) || (formData.get('database_type') === 'postgresql' ? 5432 : 1433),
                 external_db_username: formData.get('external_db_username'),

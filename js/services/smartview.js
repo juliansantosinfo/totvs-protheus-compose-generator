@@ -19,21 +19,21 @@
  */
 function generateSmartViewService(config) {
     return {
-        image: `juliansantosinfo/totvs_smartview:${config.smartview_version}`,
-        container_name: config.smartview_container_name,
-        restart: config.restart_policy,
+        image: `juliansantosinfo/totvs_smartview:${val(config.smartview_version, 'SMARTVIEW_VERSION')}`,
+        container_name: val(config.smartview_container_name, 'SMARTVIEW_CONTAINER_NAME'),
+        restart: val(config.restart_policy, 'RESTART_POLICY'),
         ports: [
-            `${config.smartview_app_port}:7017`,
-            `${config.smartview_config_port}:7019`
+            `${val(config.smartview_app_port, 'SMARTVIEW_APP_PORT')}:7017`,
+            `${val(config.smartview_config_port, 'SMARTVIEW_CONFIG_PORT')}:7019`
         ],
         environment: {
-            SMARTVIEW_REST_SERVER: config.smartview_rest_server,
-            SMARTVIEW_REST_PORT: config.smartview_rest_port,
-            SMARTVIEW_DISCOVERY_URL: config.smartview_discovery_url,
+            SMARTVIEW_REST_SERVER: val(config.smartview_rest_server, 'SMARTVIEW_REST_SERVER'),
+            SMARTVIEW_REST_PORT: val(config.smartview_rest_port, 'SMARTVIEW_REST_PORT'),
+            SMARTVIEW_DISCOVERY_URL: val(config.smartview_discovery_url, 'SMARTVIEW_DISCOVERY_URL'),
             EXTRACT_RESOURCES: 'true',
-            TZ: config.timezone
+            TZ: val(config.timezone, 'TZ')
         },
-        networks: [config.network_name],
+        networks: [val(config.network_name, 'NETWORK_NAME')],
         depends_on: {
             apprest: { condition: 'service_started' }
         }

@@ -18,9 +18,9 @@
  */
 function generateLicenseServerService(config) {
     const service = {
-        image: `juliansantosinfo/totvs_licenseserver:${config.licenseserver_version}`,
-        container_name: config.licenseserver_container_name,
-        restart: config.restart_policy,
+        image: `juliansantosinfo/totvs_licenseserver:${val(config.licenseserver_version, 'LICENSESERVER_VERSION')}`,
+        container_name: val(config.licenseserver_container_name, 'LICENSESERVER_CONTAINER_NAME'),
+        restart: val(config.restart_policy, 'RESTART_POLICY'),
         ulimits: {
             nofile: {
                 soft: 65536,
@@ -28,21 +28,21 @@ function generateLicenseServerService(config) {
             }
         },
         environment: {
-            LICENSE_TCP_PORT: config.license_tcp_port,
-            LICENSE_CONSOLEFILE: config.license_consolefile,
-            LICENSE_PORT: config.license_port,
-            LICENSE_WEBAPP_PORT: config.license_webapp_port,
-            TZ: config.timezone
+            LICENSE_TCP_PORT: val(config.license_tcp_port, 'LICENSE_TCP_PORT'),
+            LICENSE_CONSOLEFILE: val(config.license_consolefile, 'LICENSE_CONSOLEFILE'),
+            LICENSE_PORT: val(config.license_port, 'LICENSE_PORT'),
+            LICENSE_WEBAPP_PORT: val(config.license_webapp_port, 'LICENSE_WEBAPP_PORT'),
+            TZ: val(config.timezone, 'TZ')
         },
-        networks: [config.network_name]
+        networks: [val(config.network_name, 'NETWORK_NAME')]
     };
     
     // Add port mappings if expose_ports is enabled
     if (config.licenseserver_expose_ports) {
         service.ports = [
-            `${config.license_tcp_port_external}:${config.license_tcp_port}`,
-            `${config.license_port_external}:${config.license_port}`,
-            `${config.license_webapp_port_external}:${config.license_webapp_port}`
+            `${val(config.license_tcp_port_external, 'LICENSE_TCP_PORT_EXTERNAL')}:${val(config.license_tcp_port, 'LICENSE_TCP_PORT')}`,
+            `${val(config.license_port_external, 'LICENSE_PORT_EXTERNAL')}:${val(config.license_port, 'LICENSE_PORT')}`,
+            `${val(config.license_webapp_port_external, 'LICENSE_WEBAPP_PORT_EXTERNAL')}:${val(config.license_webapp_port, 'LICENSE_WEBAPP_PORT')}`
         ];
     }
     

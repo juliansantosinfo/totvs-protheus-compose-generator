@@ -9,18 +9,23 @@
  * @param {Object} config - Full configuration object from form
  * @returns {string} Complete docker-compose.yaml content
  * @description Main orchestrator that:
- * 1. Initializes compose structure (version, services, volumes, networks)
- * 2. Adds database service (if not external)
- * 3. Adds License Server (always required)
- * 4. Adds DBAccess (always required)
- * 5. Adds AppServer (always required)
- * 6. Adds AppRest (if enabled)
- * 7. Adds SmartView (if enabled)
- * 8. Collects all volumes (excluding bind mounts)
- * 9. Defines network configuration
- * 10. Converts to YAML format
+ * 1. Stores config globally for val() function
+ * 2. Initializes compose structure (version, services, volumes, networks)
+ * 3. Adds database service (if not external)
+ * 4. Adds License Server (always required)
+ * 5. Adds DBAccess (always required)
+ * 6. Adds AppServer (always required)
+ * 7. Adds AppRest (if enabled)
+ * 8. Adds SmartView (if enabled)
+ * 9. Collects all volumes (excluding bind mounts)
+ * 10. Defines network configuration
+ * 11. Converts to YAML format
+ * 12. Adds header if using .env file
  */
 function generateDockerCompose(config) {
+    // Store config globally for val() function
+    window._currentConfig = config;
+    
     const dbConfig = getDatabaseConfig(config);
     
     // Initialize compose structure
@@ -65,7 +70,18 @@ function generateDockerCompose(config) {
     composeDict.networks[config.network_name] = { driver: 'bridge' };
     
     // Convert to YAML
-    return jsyaml.dump(composeDict, { lineWidth: -1, noRefs: true });
+    let yaml = jsyaml.dump(composeDict, { lineWidth: -1, noRefs: true });
+    
+    // Add header if using .env file
+    if (config.use_env_file) {
+        const header = `# This docker-compose.yaml uses environment variables from .env file
+# Make sure to place the .env file in the same directory
+# 
+`;
+        yaml = header + yaml;
+    }
+    
+    return yaml;
 }
 
 /**

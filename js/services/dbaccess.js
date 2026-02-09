@@ -20,23 +20,23 @@
  */
 function generateDbAccessService(config, dbService) {
     const service = {
-        image: `juliansantosinfo/totvs_dbaccess:${config.dbaccess_version}`,
-        container_name: config.dbaccess_container_name,
-        restart: config.restart_policy,
+        image: `juliansantosinfo/totvs_dbaccess:${val(config.dbaccess_version, 'DBACCESS_VERSION')}`,
+        container_name: val(config.dbaccess_container_name, 'DBACCESS_CONTAINER_NAME'),
+        restart: val(config.restart_policy, 'RESTART_POLICY'),
         environment: {
-            DATABASE_PROFILE: config.dbaccess_database_profile,
-            DATABASE_SERVER: config.dbaccess_database_server,
-            DATABASE_PORT: config.dbaccess_database_port,
-            DATABASE_ALIAS: config.dbaccess_database_alias,
-            DATABASE_NAME: config.dbaccess_database_name,
-            DATABASE_USERNAME: config.dbaccess_database_username,
-            DATABASE_PASSWORD: config.dbaccess_database_password,
-            DBACCESS_LICENSE_SERVER: config.licenseserver_container_name,
-            DBACCESS_LICENSE_PORT: config.license_port,
-            DBACCESS_CONSOLEFILE: config.dbaccess_consolefile,
-            TZ: config.timezone
+            DATABASE_PROFILE: val(config.dbaccess_database_profile, 'DBACCESS_DATABASE_PROFILE'),
+            DATABASE_SERVER: val(config.dbaccess_database_server, 'DBACCESS_DATABASE_SERVER'),
+            DATABASE_PORT: val(config.dbaccess_database_port, 'DBACCESS_DATABASE_PORT'),
+            DATABASE_ALIAS: val(config.dbaccess_database_alias, 'DBACCESS_DATABASE_ALIAS'),
+            DATABASE_NAME: val(config.dbaccess_database_name, 'DBACCESS_DATABASE_NAME'),
+            DATABASE_USERNAME: val(config.dbaccess_database_username, 'DBACCESS_DATABASE_USERNAME'),
+            DATABASE_PASSWORD: val(config.dbaccess_database_password, 'DBACCESS_DATABASE_PASSWORD'),
+            DBACCESS_LICENSE_SERVER: val(config.licenseserver_container_name, 'LICENSESERVER_CONTAINER_NAME'),
+            DBACCESS_LICENSE_PORT: val(config.license_port, 'LICENSE_PORT'),
+            DBACCESS_CONSOLEFILE: val(config.dbaccess_consolefile, 'DBACCESS_CONSOLEFILE'),
+            TZ: val(config.timezone, 'TZ')
         },
-        networks: [config.network_name],
+        networks: [val(config.network_name, 'NETWORK_NAME')],
         depends_on: {},
         healthcheck: {
             test: ['CMD', 'isql', '-b', config.dbaccess_database_alias, config.dbaccess_database_username, config.dbaccess_database_password],
@@ -56,8 +56,8 @@ function generateDbAccessService(config, dbService) {
     // Add port mappings if expose_ports is enabled
     if (config.dbaccess_expose_ports) {
         service.ports = [
-            `${config.dbaccess_port_7890}:7890`,
-            `${config.dbaccess_port_7891}:7891`
+            `${val(config.dbaccess_port_7890, 'DBACCESS_PORT_7890')}:7890`,
+            `${val(config.dbaccess_port_7891, 'DBACCESS_PORT_7891')}:7891`
         ];
     }
     

@@ -26,21 +26,21 @@ function generatePostgresService(config, dbConfig) {
     );
     
     return {
-        image: `juliansantosinfo/totvs_postgres:${config.appserver_release}`,
-        container_name: config.postgres_container_name,
+        image: `juliansantosinfo/totvs_postgres:${val(config.appserver_release, 'APPSERVER_RELEASE')}`,
+        container_name: val(config.postgres_container_name, 'POSTGRES_CONTAINER_NAME'),
         user: 'root',
-        restart: config.restart_policy,
-        ports: [`${dbConfig.externalPort}:${dbConfig.internalPort}`],
+        restart: val(config.restart_policy, 'RESTART_POLICY'),
+        ports: [`${val(dbConfig.externalPort, 'POSTGRES_EXTERNAL_PORT')}:${dbConfig.internalPort}`],
         environment: {
-            POSTGRES_USER: config.postgres_user,
-            POSTGRES_PASSWORD: config.postgres_password,
-            POSTGRES_DB: config.postgres_db,
-            POSTGRES_INITDB_ARGS: config.postgres_initdb_args,
-            RESTORE_BACKUP: config.postgres_restore_backup ? 'Y' : 'N',
-            TZ: config.timezone
+            POSTGRES_USER: val(config.postgres_user, 'POSTGRES_USER'),
+            POSTGRES_PASSWORD: val(config.postgres_password, 'POSTGRES_PASSWORD'),
+            POSTGRES_DB: val(config.postgres_db, 'POSTGRES_DB'),
+            POSTGRES_INITDB_ARGS: val(config.postgres_initdb_args, 'POSTGRES_INITDB_ARGS'),
+            RESTORE_BACKUP: val(config.postgres_restore_backup ? 'Y' : 'N', 'RESTORE_BACKUP'),
+            TZ: val(config.timezone, 'TZ')
         },
         volumes: [volume],
-        networks: [config.network_name],
+        networks: [val(config.network_name, 'NETWORK_NAME')],
         healthcheck: {
             test: ['CMD-SHELL', `pg_isready -U ${config.postgres_user} -d ${config.postgres_db}`],
             interval: '10s',
