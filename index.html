@@ -1308,15 +1308,29 @@
                 <div class="info-box">
                     <strong>Como usar:</strong> Copie o conteúdo abaixo e salve como <code>docker-compose.yaml</code> ou clique em "Download YAML"
                 </div>
-                <div class="output-box" id="outputBox"></div>
                 
-                <div style="margin-top: 24px;">
-                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--gh-text-primary);">📋 Comandos Úteis</h3>
+                <!-- Tabs -->
+                <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--gh-border);">
+                    <button class="tab-button active" onclick="switchTab('yaml')" id="yamlTab" style="padding: 8px 16px; background: none; border: none; border-bottom: 2px solid var(--gh-accent); color: var(--gh-accent); cursor: pointer; font-weight: 600;">docker-compose.yaml</button>
+                    <button class="tab-button" onclick="switchTab('env')" id="envTab" style="padding: 8px 16px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--gh-text-secondary); cursor: pointer; font-weight: 600;">.env</button>
+                    <button class="tab-button" onclick="switchTab('commands')" id="commandsTab" style="padding: 8px 16px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--gh-text-secondary); cursor: pointer; font-weight: 600;">📋 Comandos Úteis</button>
+                </div>
+                
+                <div id="yamlContent" class="tab-content">
+                    <div class="output-box" id="outputBox"></div>
+                </div>
+                
+                <div id="envContent" class="tab-content" style="display: none;">
+                    <div class="output-box" id="envBox"></div>
+                </div>
+                
+                <div id="commandsContent" class="tab-content" style="display: none;">
                     <div class="output-box" id="commandsBox" style="font-size: 13px;"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                <button type="button" id="downloadEnvBtn" class="btn btn-primary">⬇️ Download .env</button>
                 <button type="button" id="downloadBtn" class="btn btn-primary">⬇️ Download YAML</button>
             </div>
         </div>
@@ -1374,8 +1388,10 @@
         const form = document.getElementById('configForm');
         const composeModal = document.getElementById('composeModal');
         const outputBox = document.getElementById('outputBox');
+        const envBox = document.getElementById('envBox');
         const commandsBox = document.getElementById('commandsBox');
         const downloadBtn = document.getElementById('downloadBtn');
+        const downloadEnvBtn = document.getElementById('downloadEnvBtn');
         const loading = document.getElementById('loading');
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
@@ -1428,6 +1444,7 @@
 
         let currentConfig = null;
         let currentYaml = null;
+        let currentEnv = null;
 
         // Toggle RESTORE_BACKUP warnings
         postgresRestoreBackup.addEventListener('change', function() {
@@ -1709,10 +1726,13 @@
             try {
                 // Generate YAML locally using js-yaml
                 const yamlContent = generateDockerCompose(config);
+                const envContent = generateEnvFile(config);
                 
                 currentConfig = config;
                 currentYaml = yamlContent;
+                currentEnv = envContent;
                 outputBox.textContent = yamlContent;
+                envBox.textContent = envContent;
                 commandsBox.textContent = generateDockerCommands(config);
                 composeModal.style.display = 'block';
                 showAlert('success', '✅ Docker Compose gerado com sucesso!');
@@ -1760,8 +1780,70 @@
             }
         });
 
+        downloadEnvBtn.addEventListener('click', async () => {
+            if (!currentEnv) return;
+
+            try {
+                // Create blob from .env content
+                const blob = new Blob([currentEnv], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `env`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showAlert('success', '✅ Download do .env iniciado!');
+            } catch (error) {
+                showAlert('error', '❌ Erro ao fazer download: ' + error.message);
+            }
+        });
+
         function closeModal() {
             composeModal.style.display = 'none';
+            // Reset to YAML tab
+            switchTab('yaml');
+        }
+
+        function switchTab(tab) {
+            const yamlTab = document.getElementById('yamlTab');
+            const envTab = document.getElementById('envTab');
+            const commandsTab = document.getElementById('commandsTab');
+            const yamlContent = document.getElementById('yamlContent');
+            const envContent = document.getElementById('envContent');
+            const commandsContent = document.getElementById('commandsContent');
+            
+            // Reset all tabs
+            [yamlTab, envTab, commandsTab].forEach(t => {
+                t.classList.remove('active');
+                t.style.borderBottom = '2px solid transparent';
+                t.style.color = 'var(--gh-text-secondary)';
+            });
+            
+            // Hide all content
+            [yamlContent, envContent, commandsContent].forEach(c => {
+                c.style.display = 'none';
+            });
+            
+            // Activate selected tab
+            if (tab === 'yaml') {
+                yamlTab.classList.add('active');
+                yamlTab.style.borderBottom = '2px solid var(--gh-accent)';
+                yamlTab.style.color = 'var(--gh-accent)';
+                yamlContent.style.display = 'block';
+            } else if (tab === 'env') {
+                envTab.classList.add('active');
+                envTab.style.borderBottom = '2px solid var(--gh-accent)';
+                envTab.style.color = 'var(--gh-accent)';
+                envContent.style.display = 'block';
+            } else if (tab === 'commands') {
+                commandsTab.classList.add('active');
+                commandsTab.style.borderBottom = '2px solid var(--gh-accent)';
+                commandsTab.style.color = 'var(--gh-accent)';
+                commandsContent.style.display = 'block';
+            }
         }
 
         function generateDockerCommands(config) {
