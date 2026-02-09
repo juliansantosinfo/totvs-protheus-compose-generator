@@ -10,6 +10,9 @@
     
     <!-- js-yaml -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    
+    <!-- JSZip -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <!-- Modular Generator -->
     <!-- Utilities -->
     <script src="js/utils/helpers.js"></script>
@@ -1351,6 +1354,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                <button type="button" id="downloadZipBtn" class="btn btn-primary">📦 Download ZIP</button>
                 <button type="button" id="downloadEnvBtn" class="btn btn-primary">⬇️ Download .env</button>
                 <button type="button" id="downloadBtn" class="btn btn-primary">⬇️ Download YAML</button>
             </div>
@@ -1413,6 +1417,7 @@
         const commandsBox = document.getElementById('commandsBox');
         const downloadBtn = document.getElementById('downloadBtn');
         const downloadEnvBtn = document.getElementById('downloadEnvBtn');
+        const downloadZipBtn = document.getElementById('downloadZipBtn');
         const loading = document.getElementById('loading');
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
@@ -1811,13 +1816,41 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `env`;
+                a.download = `.env`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
                 
                 showAlert('success', '✅ Download do .env iniciado!');
+            } catch (error) {
+                showAlert('error', '❌ Erro ao fazer download: ' + error.message);
+            }
+        });
+
+        downloadZipBtn.addEventListener('click', async () => {
+            if (!currentYaml || !currentEnv) return;
+
+            try {
+                // Create ZIP file
+                const zip = new JSZip();
+                zip.file(`docker-compose-${currentConfig.database_type}.yaml`, currentYaml);
+                zip.file('.env', currentEnv);
+                
+                // Generate ZIP blob
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                
+                // Download ZIP
+                const url = window.URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `totvs-protheus-${currentConfig.database_type}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showAlert('success', '✅ Download do ZIP iniciado!');
             } catch (error) {
                 showAlert('error', '❌ Erro ao fazer download: ' + error.message);
             }
