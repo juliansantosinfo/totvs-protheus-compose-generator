@@ -1621,6 +1621,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                <button type="button" id="copyYamlBtn" class="btn btn-primary">📋 Copiar YAML</button>
                 <button type="button" id="downloadZipBtn" class="btn btn-primary">📦 Download ZIP</button>
                 <button type="button" id="downloadEnvBtn" class="btn btn-primary">⬇️ Download .env</button>
                 <button type="button" id="downloadBtn" class="btn btn-primary">⬇️ Download YAML</button>
@@ -1685,6 +1686,7 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const downloadEnvBtn = document.getElementById('downloadEnvBtn');
         const downloadZipBtn = document.getElementById('downloadZipBtn');
+        const copyYamlBtn = document.getElementById('copyYamlBtn');
         const loading = document.getElementById('loading');
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
@@ -2095,6 +2097,28 @@
                 showAlert('success', '✅ Download iniciado!');
             } catch (error) {
                 showAlert('error', '❌ Erro ao fazer download: ' + error.message);
+            }
+        });
+
+        copyYamlBtn.addEventListener('click', async () => {
+            if (!currentYaml) return;
+
+            try {
+                await navigator.clipboard.writeText(currentYaml);
+                
+                // Feedback visual
+                const originalText = copyYamlBtn.innerHTML;
+                copyYamlBtn.innerHTML = '✅ Copiado!';
+                copyYamlBtn.disabled = true;
+                
+                setTimeout(() => {
+                    copyYamlBtn.innerHTML = originalText;
+                    copyYamlBtn.disabled = false;
+                }, 2000);
+                
+                showAlert('success', '✅ YAML copiado para área de transferência!');
+            } catch (error) {
+                showAlert('error', '❌ Erro ao copiar: ' + error.message);
             }
         });
 
