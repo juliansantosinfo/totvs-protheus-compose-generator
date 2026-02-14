@@ -130,6 +130,8 @@ TOTVS-Protheus-Compose-Generator/
 
 ## 💡 Exemplos de Uso
 
+> **Nota:** O arquivo gerado é nomeado automaticamente como `docker-compose-{tipo-banco}.yaml` (ex: `docker-compose-postgresql.yaml`, `docker-compose-mssql.yaml`, `docker-compose-oracle.yaml`)
+
 ### Stack Básica (PostgreSQL + AppServer)
 ```bash
 docker compose -f docker-compose-postgresql.yaml -p totvs up -d
@@ -137,12 +139,26 @@ docker compose -f docker-compose-postgresql.yaml -p totvs up -d
 
 ### Stack Completa (com REST e SmartView)
 ```bash
+# Com profiles habilitado
 docker compose -f docker-compose-postgresql.yaml --profile full -p totvs up -d
+
+# Sem profiles (todos os serviços sempre ativos)
+docker compose -f docker-compose-postgresql.yaml -p totvs up -d
 ```
 
 ### Apenas com REST
 ```bash
 docker compose -f docker-compose-postgresql.yaml --profile with-rest -p totvs up -d
+```
+
+### Apenas com SmartView
+```bash
+docker compose -f docker-compose-postgresql.yaml --profile with-smartview -p totvs up -d
+```
+
+### Microsoft SQL Server
+```bash
+docker compose -f docker-compose-mssql.yaml -p totvs up -d
 ```
 
 ### Oracle Database

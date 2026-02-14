@@ -799,6 +799,82 @@
         .content-wrapper {
             padding-bottom: 80px;
         }
+
+        /* Help Icon */
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            margin-left: 6px;
+            background: var(--gh-bg-tertiary);
+            border: 1px solid var(--gh-border);
+            border-radius: 50%;
+            color: var(--gh-text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: help;
+            transition: all 0.2s;
+            vertical-align: middle;
+        }
+
+        .help-icon:hover {
+            background: var(--gh-accent);
+            border-color: var(--gh-accent);
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        /* Tooltip */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            position: absolute;
+            z-index: 1000;
+            background: var(--gh-bg-tertiary);
+            border: 1px solid var(--gh-border);
+            color: var(--gh-text-primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            width: 320px;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--gh-border) transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-text code {
+            background: var(--gh-bg-primary);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: ui-monospace, monospace;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -809,7 +885,7 @@
                 <span id="themeText">Light</span>
             </button>
             <h1>🐳 TOTVS Protheus</h1>
-            <p>Docker Compose Generator - Standalone (Sem Backend)</p>
+            <p>Docker Compose Generator</p>
         </div>
 
         <div class="content">
@@ -821,31 +897,14 @@
                 <div class="section">
                     <h2 class="section-title">⚙️ Configurações Gerais</h2>
                     
-                    <div class="checkbox-group" style="margin-bottom: 20px;">
-                        <input type="checkbox" id="use_env_file" name="use_env_file">
-                        <label for="use_env_file">Usar arquivo .env (variáveis de ambiente) no docker-compose.yaml</label>
-                    </div>
-                    
-                    <div class="checkbox-group" style="margin-bottom: 20px;">
-                        <input type="checkbox" id="use_profiles" name="use_profiles" checked>
-                        <label for="use_profiles">Usar profiles do Docker Compose (AppRest e SmartView opcionais)</label>
-                    </div>
-                    <div id="profiles_info" style="margin-bottom: 20px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
-                        ℹ️ Com profiles habilitado, use: <code>--profile full</code> (todos), <code>--profile with-rest</code> (apenas REST) ou <code>--profile with-smartview</code> (apenas SmartView)
-                    </div>
-                    
-                    <div class="checkbox-group" style="margin-bottom: 20px;">
-                        <input type="checkbox" id="debug_script" name="debug_script">
-                        <label for="debug_script">Ativar modo de depuração (DEBUG_SCRIPT) em todos os serviços</label>
-                    </div>
-                    <div style="margin-bottom: 20px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
-                        ℹ️ Ativa logs detalhados nos scripts de inicialização de todos os containers
-                    </div>
-                    
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="network_name">Nome da Rede Docker</label>
                             <input type="text" id="network_name" name="network_name" value="totvs" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="timezone">Fuso Horário</label>
+                            <input type="text" id="timezone" name="timezone" value="America/Sao_Paulo" required>
                         </div>
                         <div class="form-group">
                             <label for="restart_policy">Política de Restart</label>
@@ -857,11 +916,57 @@
                             </select>
                         </div>
                     </div>
+                    
+                    <div class="checkbox-group" style="margin-top: 20px;">
+                        <input type="checkbox" id="use_env_file" name="use_env_file">
+                        <label for="use_env_file">
+                            Usar arquivo .env (variáveis de ambiente) no docker-compose.yaml
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Gera um arquivo <code>.env</code> separado com todas as variáveis de ambiente.<br><br>
+                                    O docker-compose.yaml usará referências como <code>\${VARIABLE}</code> ao invés de valores fixos.<br><br>
+                                    Útil para versionamento e reutilização de configurações.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-group" style="margin-top: 15px;">
+                        <input type="checkbox" id="use_profiles" name="use_profiles" checked>
+                        <label for="use_profiles">
+                            Usar profiles do Docker Compose (AppRest e SmartView opcionais)
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Com profiles habilitado, use:<br>
+                                    • <code>--profile full</code> - Todos os serviços<br>
+                                    • <code>--profile with-rest</code> - Apenas REST<br>
+                                    • <code>--profile with-smartview</code> - Apenas SmartView<br><br>
+                                    Sem profiles, AppRest e SmartView sempre iniciam.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-group" style="margin-top: 15px;">
+                        <input type="checkbox" id="debug_script" name="debug_script">
+                        <label for="debug_script">
+                            Ativar modo de depuração (DEBUG_SCRIPT) em todos os serviços
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Ativa logs detalhados nos scripts de inicialização de todos os containers.<br><br>
+                                    Útil para troubleshooting e diagnóstico de problemas durante o startup.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Database Configuration -->
                 <div class="section">
-                    <h2 class="section-title">⚙️ Configuração do Banco de Dados</h2>
+                    <h2 class="section-title">💾 Configuração do Banco de Dados</h2>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="database_type">Tipo de Banco de Dados</label>
@@ -871,15 +976,20 @@
                                 <option value="oracle">Oracle Database</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="timezone">Fuso Horário</label>
-                            <input type="text" id="timezone" name="timezone" value="America/Sao_Paulo" required>
-                        </div>
                     </div>
                     
                     <div class="checkbox-group" style="margin-top: 15px;">
                         <input type="checkbox" id="use_external_database" name="use_external_database">
-                        <label for="use_external_database">Usar banco de dados externo (não criar container)</label>
+                        <label for="use_external_database">
+                            Usar banco de dados externo (não criar container)
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Conecta a um banco de dados já existente ao invés de criar um novo container.<br><br>
+                                    Útil para ambientes onde o banco já está rodando em outro servidor ou instância.
+                                </span>
+                            </span>
+                        </label>
                     </div>
                     
                     <div id="externalDatabaseConfig" style="display: none; margin-top: 20px;">
@@ -930,10 +1040,16 @@
 
                         <div class="checkbox-group" style="margin-top: 15px;">
                             <input type="checkbox" id="postgres_restore_backup" name="postgres_restore_backup" checked>
-                            <label for="postgres_restore_backup">Restaurar backup base automaticamente (RESTORE_BACKUP)</label>
-                        </div>
-                        <div id="postgres_restore_warning" style="display: none; margin-top: 10px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
-                            ℹ️ O banco de dados será criado automaticamente no primeiro acesso ao Protheus.
+                            <label for="postgres_restore_backup">
+                                Restaurar backup base automaticamente (RESTORE_BACKUP)
+                                <span class="tooltip-container">
+                                    <span class="help-icon">?</span>
+                                    <span class="tooltip-text">
+                                        Quando desmarcado, o banco de dados será criado vazio.<br><br>
+                                        O schema e tabelas serão criados automaticamente no primeiro acesso ao Protheus.
+                                    </span>
+                                </span>
+                            </label>
                         </div>
                         
                         <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
@@ -948,6 +1064,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- End PostgreSQL Config -->
                     
                     <!-- MSSQL Config -->
                     <div id="mssqlConfig" style="margin-top: 20px; display: none;">
@@ -972,11 +1089,18 @@
 
                         <div class="checkbox-group" style="margin-top: 15px;">
                             <input type="checkbox" id="mssql_restore_backup" name="mssql_restore_backup" checked>
-                            <label for="mssql_restore_backup">Restaurar backup base automaticamente (RESTORE_BACKUP)</label>
+                            <label for="mssql_restore_backup">
+                                Restaurar backup base automaticamente (RESTORE_BACKUP)
+                                <span class="tooltip-container">
+                                    <span class="help-icon">?</span>
+                                    <span class="tooltip-text">
+                                        Quando desmarcado, o banco de dados será criado vazio.<br><br>
+                                        O schema e tabelas serão criados automaticamente no primeiro acesso ao Protheus.
+                                    </span>
+                                </span>
+                            </label>
                         </div>
-                        <div id="mssql_restore_warning" style="display: none; margin-top: 10px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
-                            ℹ️ O banco de dados será criado automaticamente no primeiro acesso ao Protheus.
-                        </div>
+                        
                         
                         <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
                         <div class="form-grid">
@@ -1014,10 +1138,16 @@
 
                         <div class="checkbox-group" style="margin-top: 15px;">
                             <input type="checkbox" id="oracle_restore_backup" name="oracle_restore_backup" checked>
-                            <label for="oracle_restore_backup">Restaurar backup base automaticamente (RESTORE_BACKUP)</label>
-                        </div>
-                        <div id="oracle_restore_warning" style="display: none; margin-top: 10px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
-                            ℹ️ O banco de dados será criado automaticamente no primeiro acesso ao Protheus.
+                            <label for="oracle_restore_backup">
+                                Restaurar backup base automaticamente (RESTORE_BACKUP)
+                                <span class="tooltip-container">
+                                    <span class="help-icon">?</span>
+                                    <span class="tooltip-text">
+                                        Quando desmarcado, o banco de dados será criado vazio.<br><br>
+                                        O schema e tabelas serão criados automaticamente no primeiro acesso ao Protheus.
+                                    </span>
+                                </span>
+                            </label>
                         </div>
                         
                         <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
@@ -1093,7 +1223,16 @@
                     
                     <div class="checkbox-group" style="margin-top: 15px;">
                         <input type="checkbox" id="dbaccess_expose_ports" name="dbaccess_expose_ports">
-                        <label for="dbaccess_expose_ports">Expor portas do DBAccess (útil para debug e ferramentas externas)</label>
+                        <label for="dbaccess_expose_ports">
+                            Expor portas do DBAccess (útil para debug e ferramentas externas)
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Expõe as portas 7890 e 7891 do DBAccess para o host.<br><br>
+                                    Útil para conectar ferramentas de debug, monitoramento ou clientes ODBC externos diretamente ao DBAccess.
+                                </span>
+                            </span>
+                        </label>
                     </div>
                     <div id="dbAccessPortsConfig" style="display: none; margin-top: 15px;">
                         <div class="form-grid">
@@ -1138,7 +1277,16 @@
                     
                     <div class="checkbox-group" style="margin-top: 15px;">
                         <input type="checkbox" id="licenseserver_expose_ports" name="licenseserver_expose_ports">
-                        <label for="licenseserver_expose_ports">Expor portas do License Server (útil para monitoramento)</label>
+                        <label for="licenseserver_expose_ports">
+                            Expor portas do License Server (útil para monitoramento)
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Expõe as portas 2234, 5555 e 8020 do License Server para o host.<br><br>
+                                    Útil para acessar a interface web de monitoramento (porta 8020) ou conectar ferramentas de gerenciamento de licenças.
+                                </span>
+                            </span>
+                        </label>
                     </div>
                     <div id="licenseServerPortsConfig" style="display: none; margin-top: 15px;">
                         <div class="form-grid">
@@ -1223,7 +1371,16 @@
                     <h3 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Adicionais</h3>
                     <div class="checkbox-group">
                         <input type="checkbox" id="appserver_enable_volume_apo" name="appserver_enable_volume_apo">
-                        <label for="appserver_enable_volume_apo">Habilitar volume para RPO (/totvs/protheus/apo)</label>
+                        <label for="appserver_enable_volume_apo">
+                            Habilitar volume para RPO (/totvs/protheus/apo)
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Volume separado para o repositório de objetos (RPO).<br><br>
+                                    Útil para mapear um <code>custom.rpo</code> específico ou compartilhar RPOs entre containers.
+                                </span>
+                            </span>
+                        </label>
                     </div>
                     <div id="volumeApoConfig" style="display: none; margin-top: 15px;">
                         <div class="form-grid">
@@ -1240,7 +1397,16 @@
                     
                     <div class="checkbox-group" style="margin-top: 15px;">
                         <input type="checkbox" id="appserver_enable_volume_logs" name="appserver_enable_volume_logs">
-                        <label for="appserver_enable_volume_logs">Habilitar volume para diretório appserver (/totvs/protheus/bin/appserver)</label>
+                        <label for="appserver_enable_volume_logs">
+                            Habilitar volume para diretório appserver (/totvs/protheus/bin/appserver)
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Volume separado para logs e configurações do AppServer.<br><br>
+                                    Útil para persistir logs entre reinicializações ou acessar arquivos de configuração.
+                                </span>
+                            </span>
+                        </label>
                     </div>
                     <div id="volumeLogsConfig" style="display: none; margin-top: 15px;">
                         <div class="form-grid">
@@ -1261,7 +1427,16 @@
                     <h2 class="section-title">🌐 Servidor REST (Opcional)</h2>
                     <div class="checkbox-group">
                         <input type="checkbox" id="include_rest_server" name="include_rest_server">
-                        <label for="include_rest_server">Incluir servidor REST dedicado</label>
+                        <label for="include_rest_server">
+                            Incluir servidor REST dedicado
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Cria um container separado otimizado para atender requisições REST/API.<br><br>
+                                    Recomendado para ambientes com alto volume de chamadas REST ou quando precisa escalar independentemente do AppServer principal.
+                                </span>
+                            </span>
+                        </label>
                     </div>
                     <div id="restServerConfig" style="display: none; margin-top: 20px;">
                         <div class="form-grid">
@@ -1294,7 +1469,17 @@
                         
                         <div class="checkbox-group" style="margin-top: 15px;">
                             <input type="checkbox" id="apprest_enable_volume_apo" name="apprest_enable_volume_apo">
-                            <label for="apprest_enable_volume_apo">Habilitar volume independente para RPO (/totvs/protheus/apo)</label>
+                            <label for="apprest_enable_volume_apo">
+                                Habilitar volume independente para RPO (/totvs/protheus/apo)
+                                <span class="tooltip-container">
+                                    <span class="help-icon">?</span>
+                                    <span class="tooltip-text">
+                                        Volume separado do AppServer principal.<br><br>
+                                        Desmarcado: compartilha o volume APO do AppServer.<br>
+                                        Marcado: cria volume independente para o AppRest.
+                                    </span>
+                                </span>
+                            </label>
                         </div>
                         <div id="apprestVolumeApoConfig" style="display: none; margin-top: 15px;">
                             <div class="form-grid">
@@ -1311,7 +1496,17 @@
                         
                         <div class="checkbox-group" style="margin-top: 15px;">
                             <input type="checkbox" id="apprest_enable_volume_logs" name="apprest_enable_volume_logs">
-                            <label for="apprest_enable_volume_logs">Habilitar volume independente para diretório appserver (/totvs/protheus/bin/appserver)</label>
+                            <label for="apprest_enable_volume_logs">
+                                Habilitar volume independente para diretório appserver (/totvs/protheus/bin/appserver)
+                                <span class="tooltip-container">
+                                    <span class="help-icon">?</span>
+                                    <span class="tooltip-text">
+                                        Volume separado do AppServer principal.<br><br>
+                                        Desmarcado: compartilha o volume de logs do AppServer.<br>
+                                        Marcado: cria volume independente para o AppRest.
+                                    </span>
+                                </span>
+                            </label>
                         </div>
                         <div id="apprestVolumeLogsConfig" style="display: none; margin-top: 15px;">
                             <div class="form-grid">
@@ -1333,7 +1528,16 @@
                     <h2 class="section-title">📊 SmartView (Opcional)</h2>
                     <div class="checkbox-group">
                         <input type="checkbox" id="include_smartview" name="include_smartview">
-                        <label for="include_smartview">Incluir servidor SmartView (requer servidor REST)</label>
+                        <label for="include_smartview">
+                            Incluir servidor SmartView (requer servidor REST)
+                            <span class="tooltip-container">
+                                <span class="help-icon">?</span>
+                                <span class="tooltip-text">
+                                    Servidor de Business Intelligence e Analytics (TReports).<br><br>
+                                    Requer o servidor REST para funcionar. Se marcado, o REST será incluído automaticamente.
+                                </span>
+                            </span>
+                        </label>
                     </div>
                     <div id="smartviewConfig" style="display: none; margin-top: 20px;">
                         <div class="info-box">
@@ -1528,28 +1732,12 @@
         const licenseServerExposePorts = document.getElementById('licenseserver_expose_ports');
         const licenseServerPortsConfig = document.getElementById('licenseServerPortsConfig');
         const postgresRestoreBackup = document.getElementById('postgres_restore_backup');
-        const postgresRestoreWarning = document.getElementById('postgres_restore_warning');
         const mssqlRestoreBackup = document.getElementById('mssql_restore_backup');
-        const mssqlRestoreWarning = document.getElementById('mssql_restore_warning');
         const oracleRestoreBackup = document.getElementById('oracle_restore_backup');
-        const oracleRestoreWarning = document.getElementById('oracle_restore_warning');
 
         let currentConfig = null;
         let currentYaml = null;
         let currentEnv = null;
-
-        // Toggle RESTORE_BACKUP warnings
-        postgresRestoreBackup.addEventListener('change', function() {
-            postgresRestoreWarning.style.display = this.checked ? 'none' : 'block';
-        });
-
-        mssqlRestoreBackup.addEventListener('change', function() {
-            mssqlRestoreWarning.style.display = this.checked ? 'none' : 'block';
-        });
-
-        oracleRestoreBackup.addEventListener('change', function() {
-            oracleRestoreWarning.style.display = this.checked ? 'none' : 'block';
-        });
 
         // Sync database password to DBAccess
         postgresPassword.addEventListener('input', function() {
@@ -1679,6 +1867,9 @@
         }
 
         databaseTypeSelect.addEventListener('change', updateDatabaseConfig);
+        
+        // Initialize database config on page load
+        updateDatabaseConfig();
         
         // Toggle external database config
         useExternalDatabase.addEventListener('change', function() {
@@ -2000,44 +2191,65 @@
         }
 
         function generateDockerCommands(config) {
-            const dbService = config.database_type === 'postgresql' ? 'postgres' : 'mssql';
+            const dbType = config.database_type;
+            const composeFile = `docker-compose-${dbType}.yaml`;
+            const dbService = dbType === 'postgresql' ? 'postgres' : (dbType === 'oracle' ? 'oracle' : 'mssql');
             const services = ['licenseserver', 'dbaccess', 'appserver'];
             if (config.include_rest_server) services.push('apprest');
             if (config.include_smartview) services.push('smartview');
             
+            const profileCmd = config.use_profiles && (config.include_rest_server || config.include_smartview) 
+                ? ' --profile full' 
+                : '';
+            
             let commands = `# Iniciar todos os serviços
-docker-compose up -d
+docker compose -f ${composeFile} -p totvs${profileCmd} up -d
 
 # Ver logs em tempo real
-docker-compose logs -f
+docker compose -f ${composeFile} -p totvs logs -f
 
 # Ver logs de um serviço específico
-docker-compose logs -f appserver
+docker compose -f ${composeFile} -p totvs logs -f appserver
 
 # Parar todos os serviços
-docker-compose down
+docker compose -f ${composeFile} -p totvs down
 
 # Parar e remover volumes (CUIDADO: apaga dados!)
-docker-compose down -v
+docker compose -f ${composeFile} -p totvs down -v
 
 # Reiniciar um serviço
-docker-compose restart appserver
+docker compose -f ${composeFile} -p totvs restart appserver
 
 # Ver status dos containers
-docker-compose ps
+docker compose -f ${composeFile} -p totvs ps
 
 # Acessar shell do AppServer
 docker exec -it ${config.appserver_container_name} bash`;
 
             // Only add database commands if not using external
             if (!config.use_external_database) {
+                let dbContainer, dbCommand;
+                if (dbType === 'postgresql') {
+                    dbContainer = config.postgres_container_name;
+                    dbCommand = 'psql -U postgres';
+                } else if (dbType === 'oracle') {
+                    dbContainer = config.oracle_container_name;
+                    dbCommand = 'sqlplus system/ProtheusDatabasePassword1@localhost:1521/XEPDB1';
+                } else {
+                    dbContainer = config.mssql_container_name;
+                    dbCommand = '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C';
+                }
+                
+                const volumeName = dbType === 'postgresql' ? config.postgres_volume_name : 
+                                  (dbType === 'oracle' ? config.oracle_volume_name : config.mssql_volume_name);
+                
                 commands += `
 
 # Acessar banco de dados
-docker exec -it ${config.database_type === 'postgresql' ? config.postgres_container_name : config.mssql_container_name} ${config.database_type === 'postgresql' ? 'psql -U postgres' : '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C'}
+docker exec -it ${dbContainer} ${dbCommand}
 
 # Backup do volume de dados (exemplo)
-docker run --rm -v ${config.database_type === 'postgresql' ? config.postgres_volume_name : config.mssql_volume_name}:/data -v $(pwd):/backup alpine tar czf /backup/db-backup.tar.gz /data`;
+docker run --rm -v ${volumeName}:/data -v $(pwd):/backup alpine tar czf /backup/db-backup.tar.gz /data`;
             } else {
                 commands += `
 
