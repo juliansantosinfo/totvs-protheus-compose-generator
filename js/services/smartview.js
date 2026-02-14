@@ -15,10 +15,17 @@
  * - Environment variables (REST server connection, discovery URL)
  * - Network configuration
  * - Service dependency on AppRest
+ * - Profiles for optional deployment
  * @note SmartView requires AppRest service to be running
  */
 function generateSmartViewService(config) {
-    return {
+    const volume = formatVolume(
+        config.smartview_volume_name || 'totvs_smartview_data',
+        config.smartview_volume_bind,
+        '/totvs/smartview'
+    );
+    
+    const service = {
         image: `juliansantosinfo/totvs_smartview:${val(config.smartview_version, 'SMARTVIEW_VERSION')}`,
         container_name: val(config.smartview_container_name, 'SMARTVIEW_CONTAINER_NAME'),
         restart: val(config.restart_policy, 'RESTART_POLICY'),
@@ -27,15 +34,17 @@ function generateSmartViewService(config) {
             `${val(config.smartview_config_port, 'SMARTVIEW_CONFIG_PORT')}:7019`
         ],
         environment: {
-            SMARTVIEW_REST_SERVER: val(config.smartview_rest_server, 'SMARTVIEW_REST_SERVER'),
-            SMARTVIEW_REST_PORT: val(config.smartview_rest_port, 'SMARTVIEW_REST_PORT'),
-            SMARTVIEW_DISCOVERY_URL: val(config.smartview_discovery_url, 'SMARTVIEW_DISCOVERY_URL'),
             EXTRACT_RESOURCES: 'true',
             TZ: val(config.timezone, 'TZ')
         },
-        networks: [val(config.network_name, 'NETWORK_NAME')],
-        depends_on: {
-            apprest: { condition: 'service_started' }
-        }
+        volumes: [volume],
+        networks: [val(config.network_name, 'NETWORK_NAME')]
     };
+    
+    // Add profiles if enabled
+    if (config.use_profiles) {
+        service.profiles = ['full', 'with-smartview'];
+    }
+    
+    return service;
 }

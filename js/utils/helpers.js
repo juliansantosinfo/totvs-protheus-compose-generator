@@ -25,17 +25,42 @@ function val(value, envVar) {
  * @returns {Object} Database service details
  */
 function getDatabaseConfig(config) {
-    const isPostgres = config.database_type === 'postgresql';
+    const dbType = config.database_type;
     
-    return {
-        service: isPostgres ? 'postgres' : 'mssql',
-        container: isPostgres ? config.postgres_container_name : config.mssql_container_name,
-        internalPort: isPostgres ? 5432 : 1433,
-        externalPort: isPostgres ? config.postgres_external_port : config.mssql_external_port,
-        volumeName: isPostgres ? config.postgres_volume_name : config.mssql_volume_name,
-        volumeBind: isPostgres ? config.postgres_volume_bind : config.mssql_volume_bind,
-        volumePath: isPostgres ? '/var/lib/postgresql/data' : '/var/opt/mssql/data'
-    };
+    if (dbType === 'postgresql') {
+        return {
+            service: 'postgres',
+            container: config.postgres_container_name,
+            internalPort: 5432,
+            externalPort: config.postgres_external_port,
+            volumeName: config.postgres_volume_name,
+            volumeBind: config.postgres_volume_bind,
+            volumePath: '/var/lib/postgresql/data',
+            username: config.postgres_user || 'postgres'
+        };
+    } else if (dbType === 'oracle') {
+        return {
+            service: 'oracle',
+            container: config.oracle_container_name,
+            internalPort: 1521,
+            externalPort: config.oracle_external_port,
+            volumeName: config.oracle_volume_name,
+            volumeBind: config.oracle_volume_bind,
+            volumePath: '/opt/oracle/oradata',
+            username: config.oracle_user || 'system'
+        };
+    } else {
+        return {
+            service: 'mssql',
+            container: config.mssql_container_name,
+            internalPort: 1433,
+            externalPort: config.mssql_external_port,
+            volumeName: config.mssql_volume_name,
+            volumeBind: config.mssql_volume_bind,
+            volumePath: '/var/opt/mssql/data',
+            username: config.mssql_user || 'sa'
+        };
+    }
 }
 
 /**

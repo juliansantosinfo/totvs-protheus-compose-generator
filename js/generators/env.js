@@ -91,6 +91,16 @@ ${config.postgres_volume_bind ? `POSTGRES_VOLUME_BIND=${config.postgres_volume_b
 RESTORE_BACKUP=${config.postgres_restore_backup ? 'Y' : 'N'}
 
 `;
+    } else if (config.database_type === 'oracle') {
+        return `# Oracle Configuration
+ORACLE_CONTAINER_NAME=${config.oracle_container_name}
+ORACLE_PASSWORD=${config.oracle_password}
+ORACLE_EXTERNAL_PORT=${config.oracle_external_port}
+ORACLE_VOLUME_NAME=${config.oracle_volume_name}
+${config.oracle_volume_bind ? `ORACLE_VOLUME_BIND=${config.oracle_volume_bind}` : '# ORACLE_VOLUME_BIND='}
+RESTORE_BACKUP=${config.oracle_restore_backup ? 'Y' : 'N'}
+
+`;
     } else {
         return `# MSSQL Configuration
 MSSQL_CONTAINER_NAME=${config.mssql_container_name}

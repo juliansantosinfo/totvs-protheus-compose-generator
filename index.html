@@ -20,6 +20,7 @@
     <!-- Services -->
     <script src="js/services/postgres.js"></script>
     <script src="js/services/mssql.js"></script>
+    <script src="js/services/oracle.js"></script>
     <script src="js/services/licenseserver.js"></script>
     <script src="js/services/dbaccess.js"></script>
     <script src="js/services/appserver.js"></script>
@@ -825,6 +826,14 @@
                         <label for="use_env_file">Usar arquivo .env (variáveis de ambiente) no docker-compose.yaml</label>
                     </div>
                     
+                    <div class="checkbox-group" style="margin-bottom: 20px;">
+                        <input type="checkbox" id="use_profiles" name="use_profiles" checked>
+                        <label for="use_profiles">Usar profiles do Docker Compose (AppRest e SmartView opcionais)</label>
+                    </div>
+                    <div id="profiles_info" style="margin-bottom: 20px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
+                        ℹ️ Com profiles habilitado, use: <code>--profile full</code> (todos), <code>--profile with-rest</code> (apenas REST) ou <code>--profile with-smartview</code> (apenas SmartView)
+                    </div>
+                    
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="network_name">Nome da Rede Docker</label>
@@ -851,6 +860,7 @@
                             <select id="database_type" name="database_type" required>
                                 <option value="postgresql">PostgreSQL (Recomendado)</option>
                                 <option value="mssql">Microsoft SQL Server</option>
+                                <option value="oracle">Oracle Database</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -972,6 +982,48 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Oracle Config -->
+                    <div id="oracleConfig" style="margin-top: 20px; display: none;">
+                        <h3 style="color: #2a5298; margin-bottom: 15px;">Oracle Database</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="oracle_container_name">Nome do Container</label>
+                                <input type="text" id="oracle_container_name" name="oracle_container_name" value="totvs_oracle">
+                            </div>
+                            <div class="form-group">
+                                <label for="oracle_password">Senha (SYS/SYSTEM/PDBADMIN)</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="oracle_password" name="oracle_password" value="ProtheusDatabasePassword1">
+                                    <button type="button" class="toggle-password" onclick="togglePassword('oracle_password')">👁️</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="oracle_external_port">Porta Externa</label>
+                                <input type="number" id="oracle_external_port" name="oracle_external_port" value="21521">
+                            </div>
+                        </div>
+
+                        <div class="checkbox-group" style="margin-top: 15px;">
+                            <input type="checkbox" id="oracle_restore_backup" name="oracle_restore_backup" checked>
+                            <label for="oracle_restore_backup">Restaurar backup base automaticamente (RESTORE_BACKUP)</label>
+                        </div>
+                        <div id="oracle_restore_warning" style="display: none; margin-top: 10px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
+                            ℹ️ O banco de dados será criado automaticamente no primeiro acesso ao Protheus.
+                        </div>
+                        
+                        <h4 style="color: #2a5298; margin: 20px 0 15px 0;">Volumes Obrigatórios</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="oracle_volume_name">Nome do Volume de Dados</label>
+                                <input type="text" id="oracle_volume_name" name="oracle_volume_name" value="totvs_oracle_data">
+                            </div>
+                            <div class="form-group">
+                                <label for="oracle_volume_bind">Bind Mount (caminho do host - deixe vazio para usar volume)</label>
+                                <input type="text" id="oracle_volume_bind" name="oracle_volume_bind" placeholder="/caminho/no/host/oracle_data">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- DBAccess Configuration -->
@@ -995,6 +1047,7 @@
                             <select id="dbaccess_database_profile" name="dbaccess_database_profile" disabled>
                                 <option value="POSTGRES">POSTGRES</option>
                                 <option value="MSSQL" selected>MSSQL</option>
+                                <option value="ORACLE">ORACLE</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -1430,6 +1483,7 @@
         const databaseTypeSelect = document.getElementById('database_type');
         const postgresConfig = document.getElementById('postgresConfig');
         const mssqlConfig = document.getElementById('mssqlConfig');
+        const oracleConfig = document.getElementById('oracleConfig');
         const dbAccessProfile = document.getElementById('dbaccess_database_profile');
         const dbAccessServer = document.getElementById('dbaccess_database_server');
         const dbAccessPort = document.getElementById('dbaccess_database_port');
@@ -1437,8 +1491,10 @@
         const dbAccessPassword = document.getElementById('dbaccess_database_password');
         const postgresPassword = document.getElementById('postgres_password');
         const mssqlPassword = document.getElementById('mssql_sa_password');
+        const oraclePassword = document.getElementById('oracle_password');
         const postgresContainerName = document.getElementById('postgres_container_name');
         const mssqlContainerName = document.getElementById('mssql_container_name');
+        const oracleContainerName = document.getElementById('oracle_container_name');
         
         const includeSmartviewCheckbox = document.getElementById('include_smartview');
         const smartviewConfig = document.getElementById('smartviewConfig');
@@ -1467,6 +1523,8 @@
         const postgresRestoreWarning = document.getElementById('postgres_restore_warning');
         const mssqlRestoreBackup = document.getElementById('mssql_restore_backup');
         const mssqlRestoreWarning = document.getElementById('mssql_restore_warning');
+        const oracleRestoreBackup = document.getElementById('oracle_restore_backup');
+        const oracleRestoreWarning = document.getElementById('oracle_restore_warning');
 
         let currentConfig = null;
         let currentYaml = null;
@@ -1481,9 +1539,25 @@
             mssqlRestoreWarning.style.display = this.checked ? 'none' : 'block';
         });
 
+        oracleRestoreBackup.addEventListener('change', function() {
+            oracleRestoreWarning.style.display = this.checked ? 'none' : 'block';
+        });
+
         // Sync database password to DBAccess
         postgresPassword.addEventListener('input', function() {
             if (databaseTypeSelect.value === 'postgresql') {
+                dbAccessPassword.value = this.value;
+            }
+        });
+
+        mssqlPassword.addEventListener('input', function() {
+            if (databaseTypeSelect.value === 'mssql') {
+                dbAccessPassword.value = this.value;
+            }
+        });
+
+        oraclePassword.addEventListener('input', function() {
+            if (databaseTypeSelect.value === 'oracle') {
                 dbAccessPassword.value = this.value;
             }
         });
@@ -1569,26 +1643,30 @@
 
         // Toggle database config based on type
         function updateDatabaseConfig() {
-            const isPostgres = databaseTypeSelect.value === 'postgresql';
+            const dbType = databaseTypeSelect.value;
+            const isPostgres = dbType === 'postgresql';
+            const isOracle = dbType === 'oracle';
+            const isMssql = dbType === 'mssql';
             const isExternal = useExternalDatabase.checked;
             
             postgresConfig.style.display = !isExternal && isPostgres ? 'block' : 'none';
-            mssqlConfig.style.display = !isExternal && !isPostgres ? 'block' : 'none';
+            mssqlConfig.style.display = !isExternal && isMssql ? 'block' : 'none';
+            oracleConfig.style.display = !isExternal && isOracle ? 'block' : 'none';
             
             if (isExternal) {
                 // Update DBAccess with external database info
-                dbAccessProfile.value = isPostgres ? 'POSTGRES' : 'MSSQL';
+                dbAccessProfile.value = isPostgres ? 'POSTGRES' : (isOracle ? 'ORACLE' : 'MSSQL');
                 dbAccessServer.value = externalDbHost.value || '';
-                dbAccessPort.value = externalDbPort.value || (isPostgres ? '5432' : '1433');
-                dbAccessUsername.value = externalDbUsername.value || (isPostgres ? 'postgres' : 'sa');
+                dbAccessPort.value = externalDbPort.value || (isPostgres ? '5432' : (isOracle ? '1521' : '1433'));
+                dbAccessUsername.value = externalDbUsername.value || (isPostgres ? 'postgres' : (isOracle ? 'system' : 'sa'));
                 dbAccessPassword.value = externalDbPassword.value || '';
             } else {
                 // Update DBAccess fields automatically for container
-                dbAccessProfile.value = isPostgres ? 'POSTGRES' : 'MSSQL';
-                dbAccessServer.value = isPostgres ? postgresContainerName.value : mssqlContainerName.value;
-                dbAccessPort.value = isPostgres ? '5432' : '1433';
-                dbAccessUsername.value = isPostgres ? 'postgres' : 'sa';
-                dbAccessPassword.value = isPostgres ? postgresPassword.value : mssqlPassword.value;
+                dbAccessProfile.value = isPostgres ? 'POSTGRES' : (isOracle ? 'ORACLE' : 'MSSQL');
+                dbAccessServer.value = isPostgres ? postgresContainerName.value : (isOracle ? oracleContainerName.value : mssqlContainerName.value);
+                dbAccessPort.value = isPostgres ? '5432' : (isOracle ? '1521' : '1433');
+                dbAccessUsername.value = isPostgres ? 'postgres' : (isOracle ? 'system' : 'sa');
+                dbAccessPassword.value = isPostgres ? postgresPassword.value : (isOracle ? oraclePassword.value : mssqlPassword.value);
             }
         }
 
@@ -1651,8 +1729,9 @@
                 include_rest_server: formData.get('include_rest_server') === 'on' || formData.get('include_smartview') === 'on', // Force REST if SmartView is enabled
                 use_external_database: formData.get('use_external_database') === 'on',
                 use_env_file: formData.get('use_env_file') === 'on',
+                use_profiles: formData.get('use_profiles') === 'on',
                 external_db_host: formData.get('external_db_host'),
-                external_db_port: parseInt(formData.get('external_db_port')) || (formData.get('database_type') === 'postgresql' ? 5432 : 1433),
+                external_db_port: parseInt(formData.get('external_db_port')) || (formData.get('database_type') === 'postgresql' ? 5432 : (formData.get('database_type') === 'oracle' ? 1521 : 1433)),
                 external_db_username: formData.get('external_db_username'),
                 external_db_password: formData.get('external_db_password'),
                 network_name: formData.get('network_name'),
@@ -1661,6 +1740,7 @@
                 // Container names
                 postgres_container_name: formData.get('postgres_container_name'),
                 mssql_container_name: formData.get('mssql_container_name'),
+                oracle_container_name: formData.get('oracle_container_name'),
                 licenseserver_container_name: formData.get('licenseserver_container_name'),
                 dbaccess_container_name: formData.get('dbaccess_container_name'),
                 appserver_container_name: formData.get('appserver_container_name'),
@@ -1677,12 +1757,21 @@
                 postgres_restore_backup: formData.get('postgres_restore_backup') === 'on',
                 
                 // MSSQL
+                mssql_user: 'sa',
                 mssql_sa_password: formData.get('mssql_sa_password'),
                 mssql_accept_eula: 'Y',
                 mssql_external_port: parseInt(formData.get('mssql_external_port')),
                 mssql_volume_name: formData.get('mssql_volume_name'),
                 mssql_volume_bind: formData.get('mssql_volume_bind'),
                 mssql_restore_backup: formData.get('mssql_restore_backup') === 'on',
+                
+                // Oracle
+                oracle_user: 'system',
+                oracle_password: formData.get('oracle_password'),
+                oracle_external_port: parseInt(formData.get('oracle_external_port')),
+                oracle_volume_name: formData.get('oracle_volume_name'),
+                oracle_volume_bind: formData.get('oracle_volume_bind'),
+                oracle_restore_backup: formData.get('oracle_restore_backup') === 'on',
                 
                 // DBAccess
                 dbaccess_database_profile: formData.get('dbaccess_database_profile'),

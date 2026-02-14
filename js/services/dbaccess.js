@@ -39,7 +39,14 @@ function generateDbAccessService(config, dbService) {
         networks: [val(config.network_name, 'NETWORK_NAME')],
         depends_on: {},
         healthcheck: {
-            test: ['CMD', 'isql', '-b', config.dbaccess_database_alias, config.dbaccess_database_username, config.dbaccess_database_password],
+            test: [
+                'CMD', 
+                'isql', 
+                '-b', 
+                val(config.dbaccess_database_alias, 'DBACCESS_DATABASE_ALIAS'),
+                val(config.dbaccess_database_username, 'DBACCESS_DATABASE_USERNAME'),
+                val(config.dbaccess_database_password, 'DBACCESS_DATABASE_PASSWORD')
+            ],
             interval: '10s',
             timeout: '10s',
             retries: 10,

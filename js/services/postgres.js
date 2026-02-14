@@ -42,7 +42,10 @@ function generatePostgresService(config, dbConfig) {
         volumes: [volume],
         networks: [val(config.network_name, 'NETWORK_NAME')],
         healthcheck: {
-            test: ['CMD-SHELL', `pg_isready -U ${config.postgres_user} -d ${config.postgres_db}`],
+            test: [
+                'CMD-SHELL', 
+                `pg_isready -U \${${config.use_env_file ? 'DATABASE_USERNAME:-postgres' : config.postgres_user}} -d \${${config.use_env_file ? 'DATABASE_NAME:-protheus' : config.postgres_db}}`
+            ],
             interval: '10s',
             timeout: '5s',
             retries: 5,

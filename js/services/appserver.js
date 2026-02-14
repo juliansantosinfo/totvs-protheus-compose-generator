@@ -68,22 +68,22 @@ function generateAppServerService(config, mode = 'application') {
     const restPort = isRest ? config.apprest_rest_port : config.appserver_rest_port;
     const webManager = isRest ? config.apprest_web_manager : config.appserver_web_manager;
     
-    return {
+    const service = {
         image: `juliansantosinfo/totvs_appserver:${val(config.appserver_release, 'APPSERVER_RELEASE')}`,
         container_name: val(containerName, isRest ? 'APPREST_CONTAINER_NAME' : 'APPSERVER_CONTAINER_NAME'),
         restart: val(config.restart_policy, 'RESTART_POLICY'),
-        ports: [
-            `${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}:${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}`,
-            `${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}:${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}`,
-            `${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}:${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}`,
-            `${val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER')}:${val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER')}`
-        ],
         ulimits: {
             nofile: {
                 soft: 65536,
                 hard: 65536
             }
         },
+        ports: [
+            `${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}:${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}`,
+            `${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}:${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}`,
+            `${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}:${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}`,
+            `${val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER')}:${val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER')}`
+        ],
         environment: {
             APPSERVER_MODE: mode,
             APPSERVER_RPO_CUSTOM: val(config.appserver_rpo_custom, 'APPSERVER_RPO_CUSTOM'),
@@ -110,4 +110,11 @@ function generateAppServerService(config, mode = 'application') {
             dbaccess: { condition: 'service_healthy' }
         }
     };
+    
+    // Add profiles for apprest
+    if (isRest && config.use_profiles) {
+        service.profiles = ['full', 'with-rest'];
+    }
+    
+    return service;
 }

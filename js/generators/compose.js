@@ -38,6 +38,8 @@ function generateDockerCompose(config) {
     if (!config.use_external_database) {
         if (config.database_type === 'postgresql') {
             composeDict.services.postgres = generatePostgresService(config, dbConfig);
+        } else if (config.database_type === 'oracle') {
+            composeDict.services.oracle = generateOracleService(config, dbConfig);
         } else {
             composeDict.services.mssql = generateMssqlService(config, dbConfig);
         }
@@ -96,6 +98,7 @@ function generateDockerCompose(config) {
  * - AppServer logs (if enabled and not bind mount)
  * - AppRest APO (if independent and not bind mount)
  * - AppRest logs (if independent and not bind mount)
+ * - SmartView (if enabled and not bind mount)
  */
 function collectVolumes(config, dbConfig) {
     const volumes = {};
@@ -128,6 +131,12 @@ function collectVolumes(config, dbConfig) {
         if (config.apprest_enable_volume_logs && !config.apprest_volume_logs_bind) {
             volumes[config.apprest_volume_logs] = { driver: 'local' };
         }
+    }
+    
+    // SmartView volume
+    if (config.include_smartview && !config.smartview_volume_bind) {
+        const volumeName = config.smartview_volume_name || 'totvs_smartview_data';
+        volumes[volumeName] = { driver: 'local' };
     }
     
     return volumes;
