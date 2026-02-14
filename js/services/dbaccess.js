@@ -34,6 +34,7 @@ function generateDbAccessService(config, dbService) {
             DBACCESS_LICENSE_SERVER: val(config.licenseserver_container_name, 'LICENSESERVER_CONTAINER_NAME'),
             DBACCESS_LICENSE_PORT: val(config.license_port, 'LICENSE_PORT'),
             DBACCESS_CONSOLEFILE: val(config.dbaccess_consolefile, 'DBACCESS_CONSOLEFILE'),
+            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         networks: [val(config.network_name, 'NETWORK_NAME')],

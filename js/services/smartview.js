@@ -35,6 +35,7 @@ function generateSmartViewService(config) {
         ],
         environment: {
             EXTRACT_RESOURCES: 'true',
+            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: [volume],

@@ -37,6 +37,7 @@ function generatePostgresService(config, dbConfig) {
             POSTGRES_DB: val(config.postgres_db, 'POSTGRES_DB'),
             POSTGRES_INITDB_ARGS: val(config.postgres_initdb_args, 'POSTGRES_INITDB_ARGS'),
             RESTORE_BACKUP: val(config.postgres_restore_backup ? 'Y' : 'N', 'RESTORE_BACKUP'),
+            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: [volume],

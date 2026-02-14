@@ -35,6 +35,7 @@ function generateMssqlService(config, dbConfig) {
             SA_PASSWORD: val(config.mssql_sa_password, 'MSSQL_SA_PASSWORD'),
             ACCEPT_EULA: val(config.mssql_accept_eula, 'MSSQL_ACCEPT_EULA'),
             RESTORE_BACKUP: val(config.mssql_restore_backup ? 'Y' : 'N', 'RESTORE_BACKUP'),
+            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: [volume],

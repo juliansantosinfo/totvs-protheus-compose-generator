@@ -101,6 +101,7 @@ function generateAppServerService(config, mode = 'application') {
             APPSERVER_REST_PORT: val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT'),
             APPSERVER_WEB_MANAGER: val(webManager, isRest ? 'APPREST_WEB_MANAGER' : 'APPSERVER_WEB_MANAGER'),
             EXTRACT_RESOURCES: 'true',
+            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: volumes,

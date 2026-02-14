@@ -34,6 +34,7 @@ function generateOracleService(config, dbConfig) {
         environment: {
             ORACLE_PASSWORD: val(config.oracle_password, 'ORACLE_PASSWORD'),
             RESTORE_BACKUP: val(config.oracle_restore_backup ? 'Y' : 'N', 'RESTORE_BACKUP'),
+            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: [volume],

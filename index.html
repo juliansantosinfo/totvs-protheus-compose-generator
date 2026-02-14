@@ -834,6 +834,14 @@
                         ℹ️ Com profiles habilitado, use: <code>--profile full</code> (todos), <code>--profile with-rest</code> (apenas REST) ou <code>--profile with-smartview</code> (apenas SmartView)
                     </div>
                     
+                    <div class="checkbox-group" style="margin-bottom: 20px;">
+                        <input type="checkbox" id="debug_script" name="debug_script">
+                        <label for="debug_script">Ativar modo de depuração (DEBUG_SCRIPT) em todos os serviços</label>
+                    </div>
+                    <div style="margin-bottom: 20px; font-size: 13px; color: var(--gh-text-secondary); padding: 0 12px;">
+                        ℹ️ Ativa logs detalhados nos scripts de inicialização de todos os containers
+                    </div>
+                    
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="network_name">Nome da Rede Docker</label>
@@ -1730,6 +1738,7 @@
                 use_external_database: formData.get('use_external_database') === 'on',
                 use_env_file: formData.get('use_env_file') === 'on',
                 use_profiles: formData.get('use_profiles') === 'on',
+                debug_script: formData.get('debug_script') === 'on' ? 'true' : 'false',
                 external_db_host: formData.get('external_db_host'),
                 external_db_port: parseInt(formData.get('external_db_port')) || (formData.get('database_type') === 'postgresql' ? 5432 : (formData.get('database_type') === 'oracle' ? 1521 : 1433)),
                 external_db_username: formData.get('external_db_username'),

@@ -32,6 +32,7 @@ function generateLicenseServerService(config) {
             LICENSE_CONSOLEFILE: val(config.license_consolefile, 'LICENSE_CONSOLEFILE'),
             LICENSE_PORT: val(config.license_port, 'LICENSE_PORT'),
             LICENSE_WEBAPP_PORT: val(config.license_webapp_port, 'LICENSE_WEBAPP_PORT'),
+            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         networks: [val(config.network_name, 'NETWORK_NAME')]

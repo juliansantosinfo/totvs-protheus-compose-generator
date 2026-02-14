@@ -57,6 +57,7 @@ function generateNetworkEnv(config) {
     return `# Network Configuration
 NETWORK_NAME=${config.network_name}
 RESTART_POLICY=${config.restart_policy}
+DEBUG_SCRIPT=${config.debug_script}
 TZ=${config.timezone}
 
 `;
