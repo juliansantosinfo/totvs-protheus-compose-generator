@@ -1237,11 +1237,11 @@
                     <div id="dbAccessPortsConfig" style="display: none; margin-top: 15px;">
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="dbaccess_port_external">Porta Externa 7890</label>
+                                <label for="dbaccess_port_external">Porta Externa</label>
                                 <input type="number" id="dbaccess_port_external" name="dbaccess_port_external" value="7890">
                             </div>
                             <div class="form-group">
-                                <label for="dbaccess_audit_port">Porta Externa 7891 (Audit)</label>
+                                <label for="dbaccess_audit_port">Porta Externa (Audit)</label>
                                 <input type="number" id="dbaccess_audit_port" name="dbaccess_audit_port" value="7891">
                             </div>
                         </div>
@@ -1978,9 +1978,9 @@
                 
                 // DBAccess ports
                 if (config.dbaccess_expose_ports) {
-                    let result = addPort('DBAccess 7890', config.dbaccess_port_external);
+                    let result = addPort('DBAccess', config.dbaccess_port_external);
                     if (result) return result;
-                    result = addPort('DBAccess Audit 7891', config.dbaccess_audit_port);
+                    result = addPort('DBAccess Audit', config.dbaccess_audit_port);
                     if (result) return result;
                 }
                 
