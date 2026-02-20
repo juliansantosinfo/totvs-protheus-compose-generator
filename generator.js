@@ -60,7 +60,7 @@ DBACCESS_DATABASE_NAME=${config.dbaccess_database_name}
 DBACCESS_DATABASE_USERNAME=${config.dbaccess_database_username}
 DBACCESS_DATABASE_PASSWORD=${config.dbaccess_database_password}
 DBACCESS_CONSOLEFILE=${config.dbaccess_consolefile}
-${config.dbaccess_expose_ports ? `DBACCESS_PORT_7890=${config.dbaccess_port_7890}` : '# DBACCESS_EXPOSE_PORTS=false'}
+${config.dbaccess_expose_ports ? `DBACCESS_PORT=${config.dbaccess_port}` : '# DBACCESS_EXPOSE_PORTS=false'}
 
 `;
 
@@ -267,7 +267,7 @@ function generateDockerCompose(config) {
     dbAccessDict.depends_on.licenseserver = { condition: 'service_started' };
     
     if (config.dbaccess_expose_ports) {
-        dbAccessDict.ports = [`${config.dbaccess_port_7890}:7890`];
+        dbAccessDict.ports = [`${config.dbaccess_port}:7890`];
     }
     
     composeDict.services.dbaccess = dbAccessDict;
