@@ -66,7 +66,6 @@ function generateAppServerService(config, mode = 'application') {
     const port = isRest ? config.apprest_port : config.appserver_port;
     const webPort = isRest ? config.apprest_web_port : config.appserver_web_port;
     const restPort = isRest ? config.apprest_rest_port : config.appserver_rest_port;
-    const webManager = isRest ? null : config.appserver_web_manager;
     
     const service = {
         image: `juliansantosinfo/totvs_appserver:${val(config.appserver_release, 'APPSERVER_RELEASE')}`,
@@ -78,15 +77,10 @@ function generateAppServerService(config, mode = 'application') {
                 hard: 65536
             }
         },
-        ports: isRest ? [
-            `${val(port, 'APPREST_PORT')}:${val(port, 'APPREST_PORT')}`,
-            `${val(webPort, 'APPREST_WEB_PORT')}:${val(webPort, 'APPREST_WEB_PORT')}`,
-            `${val(restPort, 'APPREST_REST_PORT')}:${val(restPort, 'APPREST_REST_PORT')}`
-        ] : [
-            `${val(port, 'APPSERVER_PORT')}:${val(port, 'APPSERVER_PORT')}`,
-            `${val(webPort, 'APPSERVER_WEB_PORT')}:${val(webPort, 'APPSERVER_WEB_PORT')}`,
-            `${val(restPort, 'APPSERVER_REST_PORT')}:${val(restPort, 'APPSERVER_REST_PORT')}`,
-            `${val(webManager, 'APPSERVER_WEB_MANAGER')}:${val(webManager, 'APPSERVER_WEB_MANAGER')}`
+        ports: [
+            `${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}:${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}`,
+            `${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}:${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}`,
+            `${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}:${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}`
         ],
         environment: {
             APPSERVER_MODE: mode,
@@ -103,7 +97,6 @@ function generateAppServerService(config, mode = 'application') {
             APPSERVER_PORT: val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT'),
             APPSERVER_WEB_PORT: val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT'),
             APPSERVER_REST_PORT: val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT'),
-            APPSERVER_WEB_MANAGER: isRest ? undefined : val(webManager, 'APPSERVER_WEB_MANAGER'),
             EXTRACT_RESOURCES: 'true',
             DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')

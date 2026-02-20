@@ -83,7 +83,6 @@ APPSERVER_RELEASE=${config.appserver_release}
 APPSERVER_PORT=${config.appserver_port}
 APPSERVER_WEB_PORT=${config.appserver_web_port}
 APPSERVER_REST_PORT=${config.appserver_rest_port}
-APPSERVER_WEB_MANAGER=${config.appserver_web_manager}
 APPSERVER_RPO_CUSTOM=${config.appserver_rpo_custom}
 APPSERVER_CONSOLEFILE=${config.appserver_consolefile}
 APPSERVER_MULTIPROTOCOLPORTSECURE=${config.appserver_multiprotocolportsecure}
@@ -288,8 +287,7 @@ function generateDockerCompose(config) {
         ports: [
             `${config.appserver_port}:${config.appserver_port}`,
             `${config.appserver_web_port}:${config.appserver_web_port}`,
-            `${config.appserver_rest_port}:${config.appserver_rest_port}`,
-            `${config.appserver_web_manager}:${config.appserver_web_manager}`
+            `${config.appserver_rest_port}:${config.appserver_rest_port}`
         ],
         ulimits: {
             nofile: {
@@ -312,7 +310,6 @@ function generateDockerCompose(config) {
             APPSERVER_PORT: config.appserver_port,
             APPSERVER_WEB_PORT: config.appserver_web_port,
             APPSERVER_REST_PORT: config.appserver_rest_port,
-            APPSERVER_WEB_MANAGER: config.appserver_web_manager,
             EXTRACT_RESOURCES: 'true',
             TZ: config.timezone
         },

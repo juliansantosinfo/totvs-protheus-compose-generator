@@ -1335,10 +1335,6 @@
                             <input type="number" id="appserver_rest_port" name="appserver_rest_port" value="8080" required>
                         </div>
                         <div class="form-group">
-                            <label for="appserver_web_manager">Porta Web Manager</label>
-                            <input type="number" id="appserver_web_manager" name="appserver_web_manager" value="8088" required>
-                        </div>
-                        <div class="form-group">
                             <label for="appserver_rpo_custom">RPO Customizado</label>
                             <input type="text" id="appserver_rpo_custom" name="appserver_rpo_custom" value="/totvs/protheus/apo/custom.rpo">
                         </div>
@@ -2003,7 +1999,6 @@
                 appserver_port: parseInt(formData.get('appserver_port')),
                 appserver_web_port: parseInt(formData.get('appserver_web_port')),
                 appserver_rest_port: parseInt(formData.get('appserver_rest_port')),
-                appserver_web_manager: parseInt(formData.get('appserver_web_manager')),
                 appserver_rpo_custom: formData.get('appserver_rpo_custom'),
                 appserver_consolefile: formData.get('appserver_consolefile'),
                 appserver_multiprotocolportsecure: parseInt(formData.get('appserver_multiprotocolportsecure')),
