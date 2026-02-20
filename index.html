@@ -1902,6 +1902,62 @@
         updateDatabaseConfig();
 
         // Enable disabled fields before form submission
+        // Validate port conflicts
+        function validatePorts(config) {
+            const ports = [];
+            const portMap = {};
+            
+            // Collect all external ports
+            if (!config.use_external_database) {
+                if (config.database_type === 'postgresql') {
+                    ports.push({ name: 'PostgreSQL', port: config.postgres_external_port });
+                } else if (config.database_type === 'mssql') {
+                    ports.push({ name: 'MSSQL', port: config.mssql_external_port });
+                } else if (config.database_type === 'oracle') {
+                    ports.push({ name: 'Oracle', port: config.oracle_external_port });
+                }
+            }
+            
+            if (config.dbaccess_expose_ports) {
+                ports.push({ name: 'DBAccess 7890', port: config.dbaccess_port_7890 });
+                ports.push({ name: 'DBAccess 7891', port: config.dbaccess_port_7891 });
+            }
+            
+            if (config.licenseserver_expose_ports) {
+                ports.push({ name: 'License TCP', port: config.license_tcp_port_external });
+                ports.push({ name: 'License Port', port: config.license_port_external });
+                ports.push({ name: 'License WebApp', port: config.license_webapp_port_external });
+            }
+            
+            ports.push({ name: 'AppServer Port', port: config.appserver_port });
+            ports.push({ name: 'AppServer Web', port: config.appserver_web_port });
+            ports.push({ name: 'AppServer REST', port: config.appserver_rest_port });
+            
+            if (config.include_rest_server) {
+                ports.push({ name: 'AppRest Port', port: config.apprest_port });
+                ports.push({ name: 'AppRest Web', port: config.apprest_web_port });
+                ports.push({ name: 'AppRest REST', port: config.apprest_rest_port });
+            }
+            
+            if (config.include_smartview) {
+                ports.push({ name: 'SmartView App', port: config.smartview_app_port });
+                ports.push({ name: 'SmartView Config', port: config.smartview_config_port });
+            }
+            
+            // Check for duplicates
+            for (const item of ports) {
+                if (portMap[item.port]) {
+                    return {
+                        valid: false,
+                        message: `Conflito de porta ${item.port}: ${portMap[item.port]} e ${item.name}`
+                    };
+                }
+                portMap[item.port] = item.name;
+            }
+            
+            return { valid: true };
+        }
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -2032,6 +2088,21 @@
                 smartview_rest_port: parseInt(formData.get('smartview_rest_port')),
                 smartview_discovery_url: formData.get('smartview_discovery_url')
             };
+
+            // Validate ports
+            const validation = validatePorts(config);
+            if (!validation.valid) {
+                showAlert('error', '❌ ' + validation.message);
+                loading.style.display = 'none';
+                dbAccessProfile.disabled = true;
+                dbAccessServer.disabled = true;
+                dbAccessPort.disabled = true;
+                dbAccessUsername.disabled = true;
+                dbAccessPassword.disabled = true;
+                smartviewRestServer.disabled = true;
+                smartviewRestPort.disabled = true;
+                return;
+            }
 
             try {
                 // Generate YAML locally using js-yaml
