@@ -1034,7 +1034,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="postgres_external_port">Porta Externa</label>
-                                <input type="number" id="postgres_external_port" name="postgres_external_port" value="25432">
+                                <input type="number" id="postgres_external_port" name="postgres_external_port" value="5432">
                             </div>
                         </div>
 
@@ -1083,7 +1083,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="mssql_external_port">Porta Externa</label>
-                                <input type="number" id="mssql_external_port" name="mssql_external_port" value="25433">
+                                <input type="number" id="mssql_external_port" name="mssql_external_port" value="1433">
                             </div>
                         </div>
 
@@ -1132,7 +1132,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="oracle_external_port">Porta Externa</label>
-                                <input type="number" id="oracle_external_port" name="oracle_external_port" value="21521">
+                                <input type="number" id="oracle_external_port" name="oracle_external_port" value="1521">
                             </div>
                         </div>
 
@@ -1324,19 +1324,19 @@
                         </div>
                         <div class="form-group">
                             <label for="appserver_port">Porta AppServer</label>
-                            <input type="number" id="appserver_port" name="appserver_port" value="25001" required>
+                            <input type="number" id="appserver_port" name="appserver_port" value="1234" required>
                         </div>
                         <div class="form-group">
                             <label for="appserver_web_port">Porta Web/Smartclient</label>
-                            <input type="number" id="appserver_web_port" name="appserver_web_port" value="25002" required>
+                            <input type="number" id="appserver_web_port" name="appserver_web_port" value="12345" required>
                         </div>
                         <div class="form-group">
                             <label for="appserver_rest_port">Porta REST</label>
-                            <input type="number" id="appserver_rest_port" name="appserver_rest_port" value="25080" required>
+                            <input type="number" id="appserver_rest_port" name="appserver_rest_port" value="8080" required>
                         </div>
                         <div class="form-group">
                             <label for="appserver_web_manager">Porta Web Manager</label>
-                            <input type="number" id="appserver_web_manager" name="appserver_web_manager" value="25088" required>
+                            <input type="number" id="appserver_web_manager" name="appserver_web_manager" value="8088" required>
                         </div>
                         <div class="form-group">
                             <label for="appserver_rpo_custom">RPO Customizado</label>
@@ -1446,19 +1446,15 @@
                             </div>
                             <div class="form-group">
                                 <label for="apprest_port">Porta AppRest</label>
-                                <input type="number" id="apprest_port" name="apprest_port" value="25101">
+                                <input type="number" id="apprest_port" name="apprest_port" value="3234">
                             </div>
                             <div class="form-group">
                                 <label for="apprest_web_port">Porta Web</label>
-                                <input type="number" id="apprest_web_port" name="apprest_web_port" value="25102">
+                                <input type="number" id="apprest_web_port" name="apprest_web_port" value="32345">
                             </div>
                             <div class="form-group">
                                 <label for="apprest_rest_port">Porta REST</label>
-                                <input type="number" id="apprest_rest_port" name="apprest_rest_port" value="25180">
-                            </div>
-                            <div class="form-group">
-                                <label for="apprest_web_manager">Porta Web Manager</label>
-                                <input type="number" id="apprest_web_manager" name="apprest_web_manager" value="25188">
+                                <input type="number" id="apprest_rest_port" name="apprest_rest_port" value="8080">
                             </div>
                         </div>
                         
@@ -2025,7 +2021,6 @@
                 apprest_port: parseInt(formData.get('apprest_port')),
                 apprest_web_port: parseInt(formData.get('apprest_web_port')),
                 apprest_rest_port: parseInt(formData.get('apprest_rest_port')),
-                apprest_web_manager: parseInt(formData.get('apprest_web_manager')),
                 apprest_enable_volume_apo: formData.get('apprest_enable_volume_apo') === 'on',
                 apprest_volume_apo: formData.get('apprest_volume_apo'),
                 apprest_volume_apo_bind: formData.get('apprest_volume_apo_bind'),

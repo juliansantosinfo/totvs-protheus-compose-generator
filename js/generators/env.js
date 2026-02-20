@@ -192,7 +192,6 @@ APPREST_CONTAINER_NAME=${config.apprest_container_name}
 APPREST_PORT=${config.apprest_port}
 APPREST_WEB_PORT=${config.apprest_web_port}
 APPREST_REST_PORT=${config.apprest_rest_port}
-APPREST_WEB_MANAGER=${config.apprest_web_manager}
 ${config.apprest_enable_volume_apo ? `APPREST_VOLUME_APO=${config.apprest_volume_apo}\n${config.apprest_volume_apo_bind ? `APPREST_VOLUME_APO_BIND=${config.apprest_volume_apo_bind}` : '# APPREST_VOLUME_APO_BIND='}` : '# APPREST_ENABLE_VOLUME_APO=false'}
 ${config.apprest_enable_volume_logs ? `APPREST_VOLUME_LOGS=${config.apprest_volume_logs}\n${config.apprest_volume_logs_bind ? `APPREST_VOLUME_LOGS_BIND=${config.apprest_volume_logs_bind}` : '# APPREST_VOLUME_LOGS_BIND='}` : '# APPREST_ENABLE_VOLUME_LOGS=false'}
 
