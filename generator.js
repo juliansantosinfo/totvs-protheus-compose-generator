@@ -60,7 +60,7 @@ DBACCESS_DATABASE_NAME=${config.dbaccess_database_name}
 DBACCESS_DATABASE_USERNAME=${config.dbaccess_database_username}
 DBACCESS_DATABASE_PASSWORD=${config.dbaccess_database_password}
 DBACCESS_CONSOLEFILE=${config.dbaccess_consolefile}
-${config.dbaccess_expose_ports ? `DBACCESS_PORT=${config.dbaccess_port}\nDBACCESS_AUDIT_PORT=${config.dbaccess_audit_port}` : '# DBACCESS_EXPOSE_PORTS=false'}
+${config.dbaccess_expose_ports ? `DBACCESS_PORT_EXTERNAL=${config.dbaccess_port_external}\nDBACCESS_AUDIT_PORT=${config.dbaccess_audit_port}` : '# DBACCESS_EXPOSE_PORTS=false'}
 
 `;
 
@@ -268,7 +268,7 @@ function generateDockerCompose(config) {
     
     if (config.dbaccess_expose_ports) {
         dbAccessDict.ports = [
-            `${config.dbaccess_port}:7890`,
+            `${config.dbaccess_port_external}:7890`,
             `${config.dbaccess_audit_port}:7891`
         ];
     }
@@ -300,7 +300,7 @@ function generateDockerCompose(config) {
             APPSERVER_RPO_CUSTOM: config.appserver_rpo_custom,
             APPSERVER_DBACCESS_DATABASE: config.dbaccess_database_profile,
             APPSERVER_DBACCESS_SERVER: config.dbaccess_container_name,
-            APPSERVER_DBACCESS_PORT: 7890,
+            APPSERVER_DBACCESS_PORT_EXTERNAL: 7890,
             APPSERVER_DBACCESS_ALIAS: config.dbaccess_database_alias,
             APPSERVER_CONSOLEFILE: config.appserver_consolefile,
             APPSERVER_MULTIPROTOCOLPORTSECURE: config.appserver_multiprotocolportsecure,
@@ -359,7 +359,7 @@ function generateDockerCompose(config) {
                 APPSERVER_RPO_CUSTOM: config.appserver_rpo_custom,
                 APPSERVER_DBACCESS_DATABASE: config.dbaccess_database_profile,
                 APPSERVER_DBACCESS_SERVER: config.dbaccess_container_name,
-                APPSERVER_DBACCESS_PORT: 7890,
+                APPSERVER_DBACCESS_PORT_EXTERNAL: 7890,
                 APPSERVER_DBACCESS_ALIAS: config.dbaccess_database_alias,
                 APPSERVER_CONSOLEFILE: config.appserver_consolefile,
                 APPSERVER_MULTIPROTOCOLPORTSECURE: config.appserver_multiprotocolportsecure,

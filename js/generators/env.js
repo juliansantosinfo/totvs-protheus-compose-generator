@@ -133,7 +133,7 @@ DBACCESS_DATABASE_NAME=${config.dbaccess_database_name}
 DBACCESS_DATABASE_USERNAME=${config.dbaccess_database_username}
 DBACCESS_DATABASE_PASSWORD=${config.dbaccess_database_password}
 DBACCESS_CONSOLEFILE=${config.dbaccess_consolefile}
-${config.dbaccess_expose_ports ? `DBACCESS_PORT=${config.dbaccess_port}\nDBACCESS_AUDIT_PORT=${config.dbaccess_audit_port}` : '# DBACCESS_EXPOSE_PORTS=false'}
+${config.dbaccess_expose_ports ? `DBACCESS_PORT_EXTERNAL=${config.dbaccess_port_external}\nDBACCESS_AUDIT_PORT=${config.dbaccess_audit_port}` : '# DBACCESS_EXPOSE_PORTS=false'}
 
 `;
 }
