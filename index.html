@@ -1224,11 +1224,11 @@
                     <div class="checkbox-group" style="margin-top: 15px;">
                         <input type="checkbox" id="dbaccess_expose_ports" name="dbaccess_expose_ports">
                         <label for="dbaccess_expose_ports">
-                            Expor portas do DBAccess (útil para debug e ferramentas externas)
+                            Expor porta do DBAccess (útil para debug e ferramentas externas)
                             <span class="tooltip-container">
                                 <span class="help-icon">?</span>
                                 <span class="tooltip-text">
-                                    Expõe as portas 7890 e 7891 do DBAccess para o host.<br><br>
+                                    Expõe a porta 7890 do DBAccess para o host.<br><br>
                                     Útil para conectar ferramentas de debug, monitoramento ou clientes ODBC externos diretamente ao DBAccess.
                                 </span>
                             </span>
@@ -1237,12 +1237,8 @@
                     <div id="dbAccessPortsConfig" style="display: none; margin-top: 15px;">
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="dbaccess_port_7890">Porta Externa 7890</label>
+                                <label for="dbaccess_port_7890">Porta Externa</label>
                                 <input type="number" id="dbaccess_port_7890" name="dbaccess_port_7890" value="7890">
-                            </div>
-                            <div class="form-group">
-                                <label for="dbaccess_port_7891">Porta Externa 7891</label>
-                                <input type="number" id="dbaccess_port_7891" name="dbaccess_port_7891" value="7891">
                             </div>
                         </div>
                     </div>
@@ -1621,6 +1617,43 @@
         </div>
     </div>
 
+    <!-- Port Conflict Modal -->
+    <div id="portConflictModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>⚠️ Conflito de Portas Detectado</h2>
+                <button class="modal-close" onclick="closePortConflictModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger" style="display: block; margin-bottom: 20px;">
+                    <strong>Erro:</strong> <span id="portConflictMessage"></span>
+                </div>
+                
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--gh-text-primary);">📋 Como Resolver</h3>
+                <div style="background: var(--gh-bg-tertiary); padding: 16px; border-radius: 6px; border-left: 3px solid var(--gh-accent);">
+                    <ol style="margin: 0; padding-left: 20px; color: var(--gh-text-primary);">
+                        <li style="margin-bottom: 8px;">Identifique os serviços em conflito na mensagem acima</li>
+                        <li style="margin-bottom: 8px;">Altere a porta de um dos serviços para um valor diferente</li>
+                        <li style="margin-bottom: 8px;">Certifique-se de que a porta está no range válido (1-65535)</li>
+                        <li>Tente gerar novamente o docker-compose</li>
+                    </ol>
+                </div>
+                
+                <h3 style="font-size: 16px; font-weight: 600; margin: 20px 0 12px 0; color: var(--gh-text-primary);">💡 Dicas</h3>
+                <div style="background: var(--gh-bg-tertiary); padding: 16px; border-radius: 6px;">
+                    <ul style="margin: 0; padding-left: 20px; color: var(--gh-text-secondary); font-size: 14px;">
+                        <li style="margin-bottom: 8px;"><strong>Portas comuns:</strong> Evite usar 80, 443, 3306, 5432, 1433 se já estiverem em uso</li>
+                        <li style="margin-bottom: 8px;"><strong>Portas altas:</strong> Use portas acima de 10000 para evitar conflitos com serviços do sistema</li>
+                        <li><strong>Padrão Protheus:</strong> AppServer (1234), AppRest (3234), REST (8080/3080)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closePortConflictModal()">Entendi, vou corrigir</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Fixed Footer Button -->
     <div class="fixed-footer">
         <div class="fixed-footer-content">
@@ -1943,8 +1976,6 @@
                 if (config.dbaccess_expose_ports) {
                     let result = addPort('DBAccess 7890', config.dbaccess_port_7890);
                     if (result) return result;
-                    result = addPort('DBAccess 7891', config.dbaccess_port_7891);
-                    if (result) return result;
                 }
                 
                 // License Server ports
@@ -2068,7 +2099,6 @@
                 dbaccess_version: formData.get('dbaccess_version'),
                 dbaccess_expose_ports: formData.get('dbaccess_expose_ports') === 'on',
                 dbaccess_port_7890: parseInt(formData.get('dbaccess_port_7890')),
-                dbaccess_port_7891: parseInt(formData.get('dbaccess_port_7891')),
                 
                 // License Server
                 license_tcp_port: parseInt(formData.get('license_tcp_port')),
@@ -2123,7 +2153,7 @@
             // Validate ports
             const validation = validatePorts(config);
             if (!validation.valid) {
-                showAlert('error', '❌ ' + validation.message);
+                showPortConflictModal(validation.message);
                 loading.style.display = 'none';
                 dbAccessProfile.disabled = true;
                 dbAccessServer.disabled = true;
@@ -2269,6 +2299,15 @@
             switchTab('yaml');
         }
 
+        function closePortConflictModal() {
+            document.getElementById('portConflictModal').style.display = 'none';
+        }
+
+        function showPortConflictModal(message) {
+            document.getElementById('portConflictMessage').textContent = message;
+            document.getElementById('portConflictModal').style.display = 'block';
+        }
+
         function switchTab(tab) {
             const yamlTab = document.getElementById('yamlTab');
             const envTab = document.getElementById('envTab');
@@ -2395,12 +2434,21 @@ docker stats`;
             if (event.target === composeModal) {
                 closeModal();
             }
+            if (event.target === document.getElementById('portConflictModal')) {
+                closePortConflictModal();
+            }
         }
 
         // Close modal on ESC key
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && composeModal.style.display === 'block') {
-                closeModal();
+            const portConflictModal = document.getElementById('portConflictModal');
+            if (event.key === 'Escape') {
+                if (composeModal.style.display === 'block') {
+                    closeModal();
+                }
+                if (portConflictModal.style.display === 'block') {
+                    closePortConflictModal();
+                }
             }
         });
     </script>

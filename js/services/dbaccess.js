@@ -63,10 +63,7 @@ function generateDbAccessService(config, dbService) {
     
     // Add port mappings if expose_ports is enabled
     if (config.dbaccess_expose_ports) {
-        service.ports = [
-            `${val(config.dbaccess_port_7890, 'DBACCESS_PORT_7890')}:7890`,
-            `${val(config.dbaccess_port_7891, 'DBACCESS_PORT_7891')}:7891`
-        ];
+        service.ports = [`${val(config.dbaccess_port_7890, 'DBACCESS_PORT_7890')}:7890`];
     }
     
     return service;
