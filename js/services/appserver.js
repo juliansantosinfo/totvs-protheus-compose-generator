@@ -86,7 +86,7 @@ function generateAppServerService(config, mode = 'application') {
             APPSERVER_MODE: mode,
             APPSERVER_RPO_CUSTOM: val(config.appserver_rpo_custom, 'APPSERVER_RPO_CUSTOM'),
             APPSERVER_DBACCESS_DATABASE: val(config.dbaccess_database_profile, 'DBACCESS_DATABASE_PROFILE'),
-            APPSERVER_DBACCESS_SERVER: 'totvs_dbaccess',
+            APPSERVER_DBACCESS_SERVER: val(config.dbaccess_container_name, 'DBACCESS_CONTAINER_NAME'),
             APPSERVER_DBACCESS_PORT: 7890,
             APPSERVER_DBACCESS_ALIAS: val(config.dbaccess_database_alias, 'DBACCESS_DATABASE_ALIAS'),
             APPSERVER_CONSOLEFILE: val(config.appserver_consolefile, 'APPSERVER_CONSOLEFILE'),
