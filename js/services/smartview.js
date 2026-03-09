@@ -35,12 +35,26 @@ function generateSmartViewService(config) {
         ],
         environment: {
             EXTRACT_RESOURCES: 'true',
-            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: [volume],
-        networks: [val(config.network_name, 'NETWORK_NAME')]
+        networks: [val(config.network_name, 'NETWORK_NAME')],
+        depends_on: {
+            apprest: { condition: 'service_healthy' }
+        },
+        healthcheck: {
+            test: ["CMD", "/healthcheck.sh"],
+            interval: '30s',
+            timeout: '10s',
+            retries: 5,
+            start_period: '60s'
+        }
     };
+    
+    // Conditionally add debug script
+    if (config.debug_script) {
+        service.environment.DEBUG_SCRIPT = val(config.debug_script, 'DEBUG_SCRIPT');
+    }
     
     // Add profiles if enabled
     if (config.use_profiles) {

@@ -26,25 +26,34 @@ function generateOracleService(config, dbConfig) {
     );
     
     return {
-        image: `juliansantosinfo/totvs_oracle:${val(config.appserver_release, 'APPSERVER_RELEASE')}`,
+        image: `juliansantosinfo/totvs_oracle:${val(config.database_version, 'ORACLE_VERSION')}`,
         container_name: val(config.oracle_container_name, 'ORACLE_CONTAINER_NAME'),
         user: 'oracle',
         restart: val(config.restart_policy, 'RESTART_POLICY'),
         ports: [`${val(dbConfig.externalPort, 'ORACLE_EXTERNAL_PORT')}:${dbConfig.internalPort}`],
         environment: {
-            ORACLE_PASSWORD: val(config.oracle_password, 'ORACLE_PASSWORD'),
-            RESTORE_BACKUP: val(config.oracle_restore_backup ? 'Y' : 'N', 'RESTORE_BACKUP'),
-            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
+            ORACLE_PWD: val(config.oracle_password, 'DATABASE_PASSWORD'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: [volume],
         networks: [val(config.network_name, 'NETWORK_NAME')],
         healthcheck: {
-            test: ['CMD-SHELL', './healthcheck.sh'],
-            interval: '20s',
+            test: ['CMD', '/healthcheck.sh'],
+            interval: '10s',
             timeout: '10s',
             retries: 10,
             start_period: '10s'
         }
     };
+
+    // Conditionally add optional environment variables
+    if (config.oracle_restore_backup) {
+        service.environment.RESTORE_BACKUP = val('Y', 'RESTORE_BACKUP');
+    }
+    
+    if (config.debug_script) {
+        service.environment.DEBUG_SCRIPT = val(config.debug_script, 'DEBUG_SCRIPT');
+    }
+
+    return service;
 }

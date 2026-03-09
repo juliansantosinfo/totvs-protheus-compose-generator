@@ -72,18 +72,50 @@ function generateDockerCompose(config) {
     composeDict.networks[config.network_name] = { driver: 'bridge' };
     
     // Convert to YAML
-    let yaml = jsyaml.dump(composeDict, { lineWidth: -1, noRefs: true });
+    let yaml = jsyaml.dump(composeDict, { 
+        lineWidth: -1, 
+        noRefs: true,
+        styles: {
+            '!!seq': 'flow'           // Output arrays as [ "CMD", "/healthcheck.sh" ]
+        }
+    });
+
+    // Post-processing to perfectly match the reference YAML format
+    // js-yaml dumps arrays with spaces like [ CMD, /healthcheck.sh ], reference uses ["CMD", "/healthcheck.sh"]
+    yaml = yaml.replace(/\[\s*CMD,\s*(.+?)\s*\]/g, '["CMD", "$1"]');
+    yaml = yaml.replace(/\[\s*CMD,\s*(.+?),\s*(.+?)\s*\]/g, '["CMD", "$1", "$2"]');
     
-    // Add header if using .env file
-    if (config.use_env_file) {
-        const header = `# This docker-compose.yaml uses environment variables from .env file
-# Make sure to place the .env file in the same directory
-# 
+    // js-yaml dumps ports without quotes if they look like simple numbers (e.g. 1234:1234)
+    // we want them quoted like '1234:1234'
+    // Also covers variables that get unquoted e.g. ${PORT:-1234}:1234 -> '${PORT:-1234}:1234'
+    yaml = yaml.replace(/ports:\n(\s+)- (.+):(.+)\n/g, "ports:\n$1- '$2:$3'\n");
+    yaml = yaml.replace(/(\s+)- ([0-9]+:[0-9]+)\n/g, "$1- '$2'\n");
+    yaml = yaml.replace(/(\s+)- ([0-9]+)\n/g, "$1- '$2'\n");
+    yaml = yaml.replace(/(\s+)- \'?(\$\{.+\}:[0-9]+)\'?\n/g, "$1- '$2'\n");
+    
+    // Ensure that string single quotes aren't doubled
+    yaml = yaml.replace(/'('[\s\S]+?')'/g, "$1");
+    
+    // Add header
+    const dbName = config.database_type === 'postgresql' ? 'PostgreSQL' : 
+                 config.database_type === 'oracle' ? 'Oracle Database' : 'Microsoft SQL Server';
+    
+    let header = `#
+# TOTVS Protheus with ${dbName}
+#
+# To run:
+# 1. Copy .env.example to .env and set your variables
+# 2. docker compose -f docker-compose-${config.database_type}.yaml -p totvs up -d
+#
 `;
-        yaml = header + yaml;
+
+    if (config.use_env_file) {
+        header += `# Note: This file uses environment variables from .env file\n#\n\n`;
+    } else {
+        header += `\n`;
     }
     
-    return yaml;
+    return header + yaml;
 }
 
 /**

@@ -16,7 +16,7 @@
  */
 function val(value, envVar) {
     // Check if we should use env vars (from config passed to generator)
-    return window._currentConfig?.use_env_file ? `\${${envVar}}` : value;
+    return window._currentConfig?.use_env_file ? `\${${envVar}:-${value}}` : value;
 }
 
 /**

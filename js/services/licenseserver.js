@@ -32,11 +32,22 @@ function generateLicenseServerService(config) {
             LICENSE_CONSOLEFILE: val(config.license_consolefile, 'LICENSE_CONSOLEFILE'),
             LICENSE_PORT: val(config.license_port, 'LICENSE_PORT'),
             LICENSE_WEBAPP_PORT: val(config.license_webapp_port, 'LICENSE_WEBAPP_PORT'),
-            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
+        },
+        healthcheck: {
+            test: ["CMD", "/healthcheck.sh"],
+            interval: '10s',
+            timeout: '5s',
+            retries: 5,
+            start_period: '10s'
         },
         networks: [val(config.network_name, 'NETWORK_NAME')]
     };
+    
+    // Conditionally add debug script
+    if (config.debug_script) {
+        service.environment.DEBUG_SCRIPT = val(config.debug_script, 'DEBUG_SCRIPT');
+    }
     
     // Add port mappings if expose_ports is enabled
     if (config.licenseserver_expose_ports) {

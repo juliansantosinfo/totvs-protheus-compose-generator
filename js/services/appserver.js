@@ -79,16 +79,15 @@ function generateAppServerService(config, mode = 'application') {
         },
         ports: [
             `${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}:${val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT')}`,
-            `${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}:${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}`,
-            `${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}:${val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT')}`
+            `${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}:${val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT')}`
         ],
         environment: {
             APPSERVER_MODE: mode,
             APPSERVER_RPO_CUSTOM: val(config.appserver_rpo_custom, 'APPSERVER_RPO_CUSTOM'),
             APPSERVER_DBACCESS_DATABASE: val(config.dbaccess_database_profile, 'DBACCESS_DATABASE_PROFILE'),
             APPSERVER_DBACCESS_SERVER: val(config.dbaccess_container_name, 'DBACCESS_CONTAINER_NAME'),
-            APPSERVER_DBACCESS_PORT: 7890,
-            APPSERVER_DBACCESS_ALIAS: val(config.dbaccess_database_alias, 'DBACCESS_DATABASE_ALIAS'),
+            APPSERVER_DBACCESS_PORT: '7890',
+            APPSERVER_DBACCESS_ALIAS: val(config.dbaccess_database_alias, 'DATABASE_ALIAS'),
             APPSERVER_CONSOLEFILE: val(config.appserver_consolefile, 'APPSERVER_CONSOLEFILE'),
             APPSERVER_MULTIPROTOCOLPORTSECURE: val(config.appserver_multiprotocolportsecure, 'APPSERVER_MULTIPROTOCOLPORTSECURE'),
             APPSERVER_MULTIPROTOCOLPORT: val(config.appserver_multiprotocolport, 'APPSERVER_MULTIPROTOCOLPORT'),
@@ -96,18 +95,34 @@ function generateAppServerService(config, mode = 'application') {
             APPSERVER_LICENSE_PORT: val(config.license_port, 'LICENSE_PORT'),
             APPSERVER_PORT: val(port, isRest ? 'APPREST_PORT' : 'APPSERVER_PORT'),
             APPSERVER_WEB_PORT: val(webPort, isRest ? 'APPREST_WEB_PORT' : 'APPSERVER_WEB_PORT'),
-            APPSERVER_REST_PORT: val(restPort, isRest ? 'APPREST_REST_PORT' : 'APPSERVER_REST_PORT'),
             EXTRACT_RESOURCES: 'true',
-            DEBUG_SCRIPT: val(config.debug_script, 'DEBUG_SCRIPT'),
             TZ: val(config.timezone, 'TZ')
         },
         volumes: volumes,
         networks: [val(config.network_name, 'NETWORK_NAME')],
         depends_on: {
-            licenseserver: { condition: 'service_started' },
+            licenseserver: { condition: 'service_healthy' },
             dbaccess: { condition: 'service_healthy' }
+        },
+        healthcheck: {
+            test: ["CMD", "/healthcheck.sh"],
+            interval: '30s',
+            timeout: '10s',
+            retries: 5,
+            start_period: '60s'
         }
     };
+    
+    // Conditionally add rest port
+    if (isRest) {
+        service.environment.APPSERVER_REST_PORT = val(restPort, 'APPREST_REST_PORT');
+        service.ports.push(`${val(restPort, 'APPREST_REST_PORT')}:${val(restPort, 'APPREST_REST_PORT')}`);
+    }
+    
+    // Conditionally add debug script
+    if (config.debug_script) {
+        service.environment.DEBUG_SCRIPT = val(config.debug_script, 'DEBUG_SCRIPT');
+    }
     
     // Add profiles for apprest
     if (isRest && config.use_profiles) {
