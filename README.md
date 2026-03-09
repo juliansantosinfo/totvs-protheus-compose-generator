@@ -87,6 +87,21 @@ TOTVS-Protheus-Compose-Generator/
 - **js-yaml**: Biblioteca para gerar YAML (via CDN)
 - **JSZip**: Biblioteca para gerar arquivos ZIP (via CDN)
 
+## 🆕 Novidades (Março 2026)
+
+### Seletor de Versão de Banco de Dados
+- Combobox dinâmico no formulário para escolher a versão exata da imagem do banco.
+- Versões integradas nativamente na arquitetura: `15` para PostgreSQL, `2019` para MSSQL e `21.3.0` para Oracle.
+- Desacoplamento da versão de imagem do banco do campo `appserver_release`.
+
+### Fielidade YAML e Variáveis Padronizadas
+- O `docker-compose.yaml` exportado agora reflete exata compatibilidade de aspas, arrays e formatações dos repositórios template oficiais.
+- Os parâmetros dinâmicos de senhas e acessos na exportação adotaram o mapeamento comum (ex: `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME`) independentemente do banco escolhido, abstraídos localmente no gerador base `val()`.
+
+### Dependências e Monitoramentos Otimizados
+- Healthchecks agora utilizam uniformemente arquivos embutidos das imagens TOTVS (`/healthcheck.sh`).
+- Dependências da licença ajustadas para tolerar inicialização (`service_healthy` ao invés de `service_started`).
+
 ## 🆕 Novidades (Fevereiro 2026)
 
 ### Suporte ao Oracle Database
